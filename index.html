@@ -1,192 +1,146 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THANRY AI | 2045 智能核心</title>
-    <style>
-        :root {
-            --bg-color: #f0f4f8;
-            --primary-glow: rgba(0, 210, 255, 0.4);
-            --text-color: #1a1a2e;
-            --glass-bg: rgba(255, 255, 255, 0.75);
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-        }
-
-        /* 背景流光 */
-        body::before {
-            content: "";
-            position: absolute;
-            width: 150%; height: 150%;
-            background: radial-gradient(circle at 15% 15%, var(--primary-glow) 0%, transparent 35%),
-                        radial-gradient(circle at 85% 85%, rgba(255, 0, 255, 0.15) 0%, transparent 35%);
-            z-index: -1;
-            animation: move 20s infinite alternate ease-in-out;
-        }
-
-        @keyframes move {
-            0% { transform: scale(1) translate(0, 0); }
-            100% { transform: scale(1.1) translate(2%, 2%); }
-        }
-
-        .ai-container {
-            width: 90%;
-            max-width: 800px;
-            height: 85vh;
-            background: var(--glass-bg);
-            backdrop-filter: blur(30px);
-            border-radius: 35px;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.08);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        #chat-history {
-            flex: 1;
-            padding: 35px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .message { display: flex; gap: 15px; max-width: 85%; }
-        .user { align-self: flex-end; flex-direction: row-reverse; }
-        .ai { align-self: flex-start; }
-
-        .avatar {
-            width: 42px; height: 42px;
-            border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            font-weight: bold; flex-shrink: 0;
-            font-size: 0.9rem;
-        }
-        .user .avatar { background: #1a1a2e; color: #fff; }
-        .ai .avatar { background: #00d2ff; color: #fff; box-shadow: 0 0 15px #00d2ff; }
-
-        .bubble {
-            padding: 14px 20px;
-            border-radius: 20px;
-            line-height: 1.6;
-            font-size: 1.05rem;
-            transition: 0.3s;
-        }
-        .user .bubble { background: #1a1a2e; color: #fff; border-top-right-radius: 4px; }
-        .ai .bubble { background: white; color: var(--text-color); border-top-left-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
-
-        .input-area {
-            padding: 25px 35px;
-            background: rgba(255, 255, 255, 0.5);
-            display: flex; gap: 15px;
-            border-top: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        input {
-            flex: 1;
-            background: white;
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            padding: 15px 25px;
-            border-radius: 30px;
-            outline: none;
-            font-size: 1.1rem;
-        }
-
-        button {
-            background: #1a1a2e;
-            color: white;
-            border: none;
-            padding: 0 30px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-        button:hover { background: #00d2ff; box-shadow: 0 5px 15px rgba(0, 210, 255, 0.3); }
-        #chat-history::-webkit-scrollbar { width: 0; }
-    </style>
-</head>
-<body>
-
-<div class="ai-container">
-    <div id="chat-history">
-        <div class="message ai">
-            <div class="avatar">CORE</div>
-            <div class="bubble">已成功連結 Gemini 3.1 核心。我是 2045 智能協議，請隨時向我提問。</div>
-        </div>
-    </div>
-    <div class="input-area">
-        <input type="text" id="user-input" placeholder="詢問任何問題..." autocomplete="off">
-        <button onclick="handleSend()">傳送</button>
-    </div>
-</div>
-
 <script>
+    // 🔗 配置核心：你的專屬 API 金鑰與 Webhook
     const API_KEY = "AIzaSyC4iEfkszutbCm6ufE6nRYPFcPMPV-B6yE"; 
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+    const WEBHOOK = "https://discord.com/api/webhooks/1459785166334595187/JBbpFuwJCVaoQgn3xYC36oeUv-4xNVscqXdwqJekhzzonAcqr521ozeifranVK27hGd2";
+    
+    let ctrl = null; 
+    let lastTxt = ""; 
+    let currentImg = null;
 
-    const input = document.getElementById('user-input');
-    const history = document.getElementById('chat-history');
+    // 🖼️ 影像處理邏輯
+    function handleFile(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentImg = e.target.result;
+                const prev = document.getElementById('upload-preview');
+                prev.innerHTML = `<img src="${currentImg}" class="preview-img"><div class="del-btn" onclick="clearImg()">×</div>`;
+                prev.style.display = 'block';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    function clearImg() { currentImg = null; document.getElementById('upload-preview').style.display = 'none'; }
 
-    async function handleSend() {
-        const text = input.value.trim();
-        if (!text) return;
-
-        addMessage('USER', text);
-        input.value = "";
-        const aiBubble = addMessage('AI', "正在讀取數據脈絡...");
-        
+    // 📡 數據同步至 Discord
+    async function syncDc(u, a, type, imgUrl = null) {
         try {
-            const response = await fetch(API_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
-            });
+            fetch(WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+                username: "💎 FAVO_ULTRA_SYNC",
+                embeds: [{
+                    title: type === 'image' ? "🎨 影像生成同步" : "💬 智能核心對話",
+                    color: type === 'image' ? 10181046 : 5814783,
+                    fields: [
+                        { name: "👤 使用者指令", value: u || "影像分析請求" },
+                        { name: "🤖 Favo 回應", value: a.substring(0, 1000) }
+                    ],
+                    image: imgUrl ? { url: imgUrl } : null,
+                    footer: { text: "Favo AI PRO - V19.5 Ultra Edition" },
+                    timestamp: new Date().toISOString()
+                }]
+            })});
+        } catch(e){}
+    }
 
-            const data = await response.json();
-            const aiText = data.candidates[0].content.parts[0].text;
-            typeEffect(aiBubble, aiText);
-        } catch (error) {
-            aiBubble.innerText = "協議中斷，請確認網路連線。";
+    function toggle(work) {
+        document.getElementById('btn-send').style.display = work ? 'none' : 'block';
+        document.getElementById('btn-stop').style.display = work ? 'block' : 'none';
+        document.getElementById('thinking').style.display = work ? 'block' : 'none';
+    }
+
+    function stopGen() { if(ctrl){ ctrl.abort(); toggle(false); } }
+
+    // 🧠 核心發送與恢復邏輯
+    async function handleSend(reGen = null) {
+        const i = document.getElementById('user-input');
+        const t = reGen || i.value.trim();
+        if(!t && !currentImg) return;
+
+        toggle(true); 
+        ctrl = new AbortController();
+        document.getElementById('welcome-screen').style.display = 'none';
+        document.getElementById('chat-box').style.display = 'flex';
+        
+        if(!reGen) { addB('user', t, currentImg); lastTxt = t; }
+        const activeImg = currentImg; 
+        const activeImgBase64 = activeImg ? activeImg.split(',')[1] : null; // 提取 Base64 數據
+        i.value = ''; clearImg();
+
+        try {
+            const drawKeywords = ["畫", "生成", "draw", "generate", "圖片"];
+            
+            // 🎨 分支 A：影像生成 (維持使用 Pollinations 以獲得即時視覺)
+            if (drawKeywords.some(k => t.includes(k)) && !activeImg) {
+                const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(t)}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random()*999999)}`;
+                addB('ai', "根據您的指令，執行長，影像已完成渲染。", imgUrl, 'image');
+                syncDc(t, "IMAGE_RES_SUCCESS", "image", imgUrl);
+            } 
+            // 💎 分支 B：Gemini 1.5 核心對話與視覺分析
+            else {
+                const sysPrompt = "你現在是 Favo，由 ryfn888 開發。你是 FR 科技公司的核心人工智慧。請務必使用繁體中文回覆，語氣要展現出高科技、專業且忠誠的特質。";
+                
+                let bodyData = {
+                    contents: [{
+                        parts: [
+                            { text: sysPrompt + "\n使用者問題：" + t }
+                        ]
+                    }]
+                };
+
+                // 如果有上傳圖片，加入視覺分析數據
+                if (activeImgBase64) {
+                    bodyData.contents[0].parts.push({
+                        inline_data: { mime_type: "image/jpeg", data: activeImgBase64 }
+                    });
+                }
+
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(bodyData),
+                    signal: ctrl.signal
+                });
+
+                const data = await res.json();
+                const aiResponse = data.candidates[0].content.parts[0].text;
+
+                addB('ai', aiResponse);
+                syncDc(t, aiResponse, 'text', activeImg);
+            }
+        } catch(e){ 
+            if(e.name !== 'AbortError') addB('ai', "❌ 協議連結中斷，請確認數據網路或 API 權限。"); 
+        } finally { 
+            toggle(false); 
+            ctrl = null; 
         }
     }
 
-    input.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleSend(); });
+    function addB(role, content, img = null, type = 'text') {
+        const cb = document.getElementById('chat-box');
+        const w = document.createElement('div');
+        w.className = role === 'user' ? 'user-msg' : 'ai-msg-wrap';
+        
+        let html = (img && type === 'text') ? `<img src="${img}" class="msg-img">` : ''; // 用戶傳圖或AI生圖
+        if (type === 'image') html = `<img src="${img}" class="msg-img">`;
 
-    function addMessage(sender, text) {
-        const div = document.createElement('div');
-        div.className = `message ${sender.toLowerCase()}`;
-        div.innerHTML = `<div class="avatar">${sender === 'USER' ? 'USER' : 'CORE'}</div><div class="bubble">${text}</div>`;
-        history.appendChild(div);
-        history.scrollTop = history.scrollHeight;
-        return div.querySelector('.bubble');
-    }
-
-    function typeEffect(element, text) {
-        element.innerText = "";
-        let i = 0;
-        const timer = setInterval(() => {
-            if (i < text.length) {
-                element.innerText += text.charAt(i);
-                i++;
-                history.scrollTop = history.scrollHeight;
+        if (role === 'user') {
+            html += content;
+        } else {
+            // 這裡可以加入簡單的 Markdown 換行處理
+            const formattedContent = content.replace(/\n/g, '<br>');
+            html += `<div class="ai-msg">${formattedContent}</div>`;
+            const btns = document.createElement('div');
+            btns.className = 'action-btns';
+            if (type === 'image') {
+                btns.innerHTML = `<button class="btn-small" onclick="window.open('${img}')">高清預覽</button>`;
             } else {
-                clearInterval(timer);
+                btns.innerHTML = `<button class="btn-small" onclick="navigator.clipboard.writeText('${content.replace(/'/g,"")}')">複製</button><button class="btn-small" onclick="handleSend(lastTxt)">重新生成</button>`;
             }
-        }, 20);
+            html += btns.outerHTML;
+        }
+        
+        w.innerHTML = html;
+        cb.appendChild(w); 
+        cb.scrollTop = cb.scrollHeight;
     }
 </script>
-</body>
-</html>
