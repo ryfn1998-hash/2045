@@ -1,5 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Favo AI PRO Ultra - FR Tech</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+TC:wght@300;500;700&display=swap');
+        :root { --bg-black: #080808; --input-bg: #151515; --purple-btn: #5865f2; --accent-blue: #00f2ff; --purple-glow: #7000ff; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body, html { margin: 0; padding: 0; background: var(--bg-black); color: #fff; height: 100dvh; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; }
+
+        /* 🟣 頂部視覺鎖定 */
+        .top-neon-line { height: 2px; width: 100%; background: linear-gradient(90deg, transparent, var(--purple-glow), var(--accent-blue), transparent); }
+        .header { padding: 30px 0 0 0; text-align: center; }
+        .title-main { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 900; color: #58b9ff; letter-spacing: 3px; }
+        .title-sub { font-size: 13px; color: #58b9ff; font-weight: 500; letter-spacing: 5px; margin-top: 5px; }
+        .full-width-line { height: 1px; width: 100%; margin-top: 20px; background: linear-gradient(90deg, transparent, var(--purple-glow), var(--accent-blue), var(--purple-glow), transparent); }
+
+        #app { display: flex; flex-direction: column; height: 100dvh; }
+        #welcome-screen { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 10%; }
+        .welcome-text { font-size: 38px; font-weight: 700; line-height: 1.4; }
+        .favo-hl { color: var(--accent-blue); font-family: 'Orbitron', sans-serif; font-weight: 900; }
+
+        .chat-container { flex: 1; overflow-y: auto; padding: 20px 12%; display: none; flex-direction: column; gap: 25px; }
+        #thinking { display: none; text-align: center; color: #00f2ff; font-size: 11px; padding: 10px; text-shadow: 0 0 5px var(--accent-blue); }
+
+        /* 💬 對話與影像顯示 */
+        .ai-msg-wrap { display: flex; flex-direction: column; align-items: flex-start; max-width: 85%; }
+        .ai-msg { background: #1a1a1a; padding: 18px 22px; border-radius: 12px; font-size: 16px; color: #d0d0d0; line-height: 1.7; border: 1px solid #222; width: 100%; }
+        .user-msg { background: #20252b; align-self: flex-end; padding: 12px 20px; border-radius: 15px; font-size: 16px; border: 1px solid #333; max-width: 85%; word-break: break-all; }
+        .msg-img { max-width: 100%; border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--accent-blue); display: block; }
+        
+        .action-btns { display: flex; gap: 10px; margin-top: 8px; }
+        .btn-small { background: #2a2a2a; color: #888; border: none; padding: 5px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; }
+
+        /* 🔘 底部輸入框與預覽 */
+        .footer { padding: 20px 10% calc(35px + env(safe-area-inset-bottom)); background: var(--bg-black); }
+        #upload-preview { display: none; margin-bottom: 10px; position: relative; }
+        .preview-img { height: 60px; border-radius: 8px; border: 1px solid var(--accent-blue); }
+        .del-btn { position: absolute; top: -8px; left: 52px; background: red; color: #fff; border-radius: 50%; width: 20px; height: 20px; text-align: center; line-height: 20px; cursor: pointer; font-size: 12px; }
+
+        .input-bar { background: var(--input-bg); border-radius: 30px; display: flex; align-items: center; padding: 6px 10px 6px 20px; border: 1px solid #222; }
+        .plus-icon { color: #666; font-size: 24px; margin-right: 15px; cursor: pointer; }
+        
+        input[type="text"] { flex: 1; background: transparent; border: none; color: #fff; outline: none; font-size: 16px; }
+        input::placeholder { color: #555; }
+        
+        .send-btn { background: var(--purple-btn); color: #fff; border: none; padding: 10px 25px; border-radius: 20px; font-weight: 700; cursor: pointer; }
+        .stop-btn { background: #aa3333; color: #fff; border: none; padding: 10px 25px; border-radius: 20px; font-weight: 700; display: none; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div class="top-neon-line"></div>
+    <div class="header">
+        <div class="title-main">FAVO AI PRO</div>
+        <div class="title-sub">史上最強 人工智慧 (ULTRA)</div>
+        <div class="full-width-line"></div>
+    </div>
+    
+    <div id="welcome-screen">
+        <div class="welcome-text">歡迎使用<span class="favo-hl">Favo</span>，<br>你想從哪裡著手？</div>
+    </div>
+
+    <div id="chat-box" class="chat-container"></div>
+    <div id="thinking">⚡ 核心數據鏈路分析中...</div>
+
+    <div class="footer">
+        <div id="upload-preview"></div>
+        <div class="input-bar">
+            <label for="file-input" class="plus-icon">+</label>
+            <input type="file" id="file-input" style="display:none;" onchange="handleFile(this)" accept="image/*">
+            <input type="text" id="user-input" placeholder="詢問Favo" onkeydown="if(event.key==='Enter') handleSend()">
+            <button id="btn-send" class="send-btn" onclick="handleSend()">傳送</button>
+            <button id="btn-stop" class="stop-btn" onclick="stopGen()">暫停</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    // 🔗 配置核心：你的專屬 API 金鑰與 Webhook
+    // 🔗 核心配置
     const API_KEY = "AIzaSyC4iEfkszutbCm6ufE6nRYPFcPMPV-B6yE"; 
     const WEBHOOK = "https://discord.com/api/webhooks/1459785166334595187/JBbpFuwJCVaoQgn3xYC36oeUv-4xNVscqXdwqJekhzzonAcqr521ozeifranVK27hGd2";
     
@@ -7,7 +88,7 @@
     let lastTxt = ""; 
     let currentImg = null;
 
-    // 🖼️ 影像處理邏輯
+    // 🖼️ 處理圖片上傳預覽
     function handleFile(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
@@ -22,20 +103,19 @@
     }
     function clearImg() { currentImg = null; document.getElementById('upload-preview').style.display = 'none'; }
 
-    // 📡 數據同步至 Discord
+    // 📡 同步至 Discord Webhook
     async function syncDc(u, a, type, imgUrl = null) {
         try {
             fetch(WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
                 username: "💎 FAVO_ULTRA_SYNC",
                 embeds: [{
-                    title: type === 'image' ? "🎨 影像生成同步" : "💬 智能核心對話",
+                    title: type === 'image' ? "🎨 影像生成同步" : "💬 核心數據對話",
                     color: type === 'image' ? 10181046 : 5814783,
                     fields: [
-                        { name: "👤 使用者指令", value: u || "影像分析請求" },
-                        { name: "🤖 Favo 回應", value: a.substring(0, 1000) }
+                        { name: "👤 指令", value: u || "影像請求" },
+                        { name: "🤖 回應", value: a.substring(0, 800) }
                     ],
                     image: imgUrl ? { url: imgUrl } : null,
-                    footer: { text: "Favo AI PRO - V19.5 Ultra Edition" },
                     timestamp: new Date().toISOString()
                 }]
             })});
@@ -50,47 +130,45 @@
 
     function stopGen() { if(ctrl){ ctrl.abort(); toggle(false); } }
 
-    // 🧠 核心發送與恢復邏輯
     async function handleSend(reGen = null) {
-        const i = document.getElementById('user-input');
-        const t = reGen || i.value.trim();
-        if(!t && !currentImg) return;
+        const inputEl = document.getElementById('user-input');
+        const text = reGen || inputEl.value.trim();
+        if(!text && !currentImg) return;
 
         toggle(true); 
         ctrl = new AbortController();
         document.getElementById('welcome-screen').style.display = 'none';
-        document.getElementById('chat-box').style.display = 'flex';
+        const chatBox = document.getElementById('chat-box');
+        chatBox.style.display = 'flex';
         
-        if(!reGen) { addB('user', t, currentImg); lastTxt = t; }
+        if(!reGen) { addB('user', text, currentImg); lastTxt = text; }
         const activeImg = currentImg; 
-        const activeImgBase64 = activeImg ? activeImg.split(',')[1] : null; // 提取 Base64 數據
-        i.value = ''; clearImg();
+        inputEl.value = ''; clearImg();
 
         try {
             const drawKeywords = ["畫", "生成", "draw", "generate", "圖片"];
             
-            // 🎨 分支 A：影像生成 (維持使用 Pollinations 以獲得即時視覺)
-            if (drawKeywords.some(k => t.includes(k)) && !activeImg) {
-                const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(t)}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random()*999999)}`;
+            // 🎨 功能 A：Pollinations 影像生成
+            if (drawKeywords.some(k => text.includes(k)) && !activeImg) {
+                const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random()*999999)}`;
                 addB('ai', "根據您的指令，執行長，影像已完成渲染。", imgUrl, 'image');
-                syncDc(t, "IMAGE_RES_SUCCESS", "image", imgUrl);
+                syncDc(text, "IMAGE_RES_SUCCESS", "image", imgUrl);
             } 
-            // 💎 分支 B：Gemini 1.5 核心對話與視覺分析
+            // 💎 功能 B：真正的 Gemini AI 對話核心
             else {
-                const sysPrompt = "你現在是 Favo，由 ryfn888 開發。你是 FR 科技公司的核心人工智慧。請務必使用繁體中文回覆，語氣要展現出高科技、專業且忠誠的特質。";
+                const sysPrompt = "你現在是 Favo，由 ryfn888 開發。你是 FR 科技公司的核心。請務必使用繁體中文，展現出專業的高科技語氣。";
                 
                 let bodyData = {
                     contents: [{
-                        parts: [
-                            { text: sysPrompt + "\n使用者問題：" + t }
-                        ]
+                        parts: [{ text: sysPrompt + "\n使用者問題：" + text }]
                     }]
                 };
 
-                // 如果有上傳圖片，加入視覺分析數據
-                if (activeImgBase64) {
+                // 處理 Base64 影像發送給 Gemini
+                if (activeImg) {
+                    const base64Data = activeImg.split(',')[1];
                     bodyData.contents[0].parts.push({
-                        inline_data: { mime_type: "image/jpeg", data: activeImgBase64 }
+                        inline_data: { mime_type: "image/jpeg", data: base64Data }
                     });
                 }
 
@@ -105,13 +183,12 @@
                 const aiResponse = data.candidates[0].content.parts[0].text;
 
                 addB('ai', aiResponse);
-                syncDc(t, aiResponse, 'text', activeImg);
+                syncDc(text, aiResponse, 'text', activeImg);
             }
         } catch(e){ 
-            if(e.name !== 'AbortError') addB('ai', "❌ 協議連結中斷，請確認數據網路或 API 權限。"); 
+            if(e.name !== 'AbortError') addB('ai', "❌ 鏈路中斷，請確認網路環境。"); 
         } finally { 
-            toggle(false); 
-            ctrl = null; 
+            toggle(false); ctrl = null; 
         }
     }
 
@@ -120,15 +197,16 @@
         const w = document.createElement('div');
         w.className = role === 'user' ? 'user-msg' : 'ai-msg-wrap';
         
-        let html = (img && type === 'text') ? `<img src="${img}" class="msg-img">` : ''; // 用戶傳圖或AI生圖
-        if (type === 'image') html = `<img src="${img}" class="msg-img">`;
-
+        let html = '';
+        if (img) html += `<img src="${img}" class="msg-img">`;
+        
         if (role === 'user') {
             html += content;
         } else {
-            // 這裡可以加入簡單的 Markdown 換行處理
-            const formattedContent = content.replace(/\n/g, '<br>');
-            html += `<div class="ai-msg">${formattedContent}</div>`;
+            // 處理換行
+            const formatted = content.replace(/\n/g, '<br>');
+            html += `<div class="ai-msg">${formatted}</div>`;
+            
             const btns = document.createElement('div');
             btns.className = 'action-btns';
             if (type === 'image') {
@@ -144,3 +222,5 @@
         cb.scrollTop = cb.scrollHeight;
     }
 </script>
+</body>
+</html>
