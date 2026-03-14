@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 程式碼生產器 - 免登入版</title>
+    <title>⚡ FR科技公司 - AI 程式碼快速生產器 (免登入版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* 自定義滾動條 */
@@ -15,14 +15,14 @@
 
     <div class="max-w-5xl mx-auto py-10 px-4">
         <header class="mb-8 text-center">
-            <h1 class="text-3xl font-extrabold text-gray-800 mb-2">⚡ AI 程式碼快速生產器</h1>
+            <h1 class="text-3xl font-extrabold text-gray-800 mb-2">⚡ FR科技公司 AI 程式碼快速生產器</h1>
             <p class="text-gray-600">選擇類型，輸入指令，立即生成你的程式碼</p>
         </header>
 
         <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <div class="flex flex-col md:flex-row gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 
-                <div class="w-full md:w-1/4">
+                <div class="col-span-1">
                     <label class="block text-sm font-medium text-gray-700 mb-1">程式格式/類型</label>
                     <select id="typeSelect" class="w-full border-gray-300 border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                         <option value="HTML/Tailwind">🌐 網頁程式 (HTML/JS)</option>
@@ -33,12 +33,12 @@
                     </select>
                 </div>
 
-                <div class="flex-1">
+                <div class="col-span-1 md:col-span-3">
                     <label class="block text-sm font-medium text-gray-700 mb-1">您的需求指令</label>
-                    <div class="relative">
+                    <div class="relative flex flex-col md:flex-row gap-2">
                         <input type="text" id="userInput" placeholder="例如：做一個會跳動的登入按鈕..." 
-                               class="w-full border-gray-300 border p-3 pr-24 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                        <button onclick="mockGenerate()" class="absolute right-2 top-2 bottom-2 bg-blue-600 hover:bg-blue-700 text-white px-6 rounded-md transition duration-200">
+                               class="flex-grow border-gray-300 border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <button onclick="simulateGenerate()" class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg transition duration-200">
                             發送
                         </button>
                     </div>
@@ -58,12 +58,17 @@
         </div>
         
         <footer class="mt-8 text-center text-gray-500 text-xs">
-            本工具為免登入開放版 | Powered by Gemini API 概念
+            © FR科技公司 | 本工具為免登入開放版 | v.26.135.6
         </footer>
     </div>
 
     <script>
-        function mockGenerate() {
+        const codeExamples = {
+            "渐层字": `<h1 class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">\n  漸層文字範例\n</h1>`,
+            "跳動按鈕": `<button class="animate-bounce bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">\n  跳動按鈕\n</button>`
+        }
+
+        function simulateGenerate() {
             const type = document.getElementById('typeSelect').value;
             const input = document.getElementById('userInput').value;
             const output = document.getElementById('codeOutput');
@@ -74,10 +79,22 @@
                 return;
             }
 
+            // 模擬生成狀態
             status.innerText = "正在生成中...";
-            output.innerText = "/* 正在模擬 AI 回傳內容... */\n\n// 類型: " + type + "\n// 需求: " + input + "\n\n// 這裡稍後會串接真正的 API 來顯示結果！";
+            output.innerText = "/* FR科技公司 AI 正在模擬回傳內容... */\n\n";
+
+            // 根據輸入內容，模擬不同的生成結果
+            setTimeout(() => {
+                if (type === "HTML/Tailwind" && input.includes("漸層字")) {
+                    output.innerText += codeExamples["渐层字"];
+                } else if (type === "HTML/Tailwind" && input.includes("跳動按鈕")) {
+                    output.innerText += codeExamples["跳動按鈕"];
+                } else {
+                     output.innerText += "/* 正在模擬 AI 回傳內容... */\n\n// 類型: " + type + "\n// 需求: " + input + "\n\n// 這裡稍後會串接真正的 API 來顯示結果！";
+                }
+                status.innerText = "已完成！";
+            }, 1000); // 模擬延遲 1 秒
             
-            // 這裡未來就是放 fetch('YOUR_API_ENDPOINT') 的地方
         }
 
         function copyCode() {
