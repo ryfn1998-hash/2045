@@ -10,39 +10,37 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body, html { margin: 0; padding: 0; background: var(--bg-black); color: #fff; height: 100dvh; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; }
 
-        /* 介面外觀優化 */
-        .top-neon-line { height: 2px; width: 100%; background: linear-gradient(90deg, transparent, var(--purple-glow), var(--accent-blue), transparent); }
-        .header { padding: 30px 0 0 0; text-align: center; }
-        .title-main { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 900; color: #58b9ff; letter-spacing: 3px; }
-        .title-sub { font-size: 13px; color: #58b9ff; font-weight: 500; letter-spacing: 5px; margin-top: 5px; }
-        .full-width-line { height: 1px; width: 100%; margin-top: 20px; background: linear-gradient(90deg, transparent, var(--purple-glow), var(--accent-blue), var(--purple-glow), transparent); }
+        /* 📱 手機大介面優化 */
+        .top-neon-line { height: 3px; width: 100%; background: linear-gradient(90deg, transparent, var(--purple-glow), var(--accent-blue), transparent); }
+        .header { padding: 25px 0 10px 0; text-align: center; }
+        .title-main { font-family: 'Orbitron', sans-serif; font-size: 26px; font-weight: 900; color: #58b9ff; letter-spacing: 2px; }
+        .title-sub { font-size: 11px; color: #58b9ff; font-weight: 500; letter-spacing: 3px; margin-top: 4px; opacity: 0.8; }
 
         #app { display: flex; flex-direction: column; height: 100dvh; }
-        #welcome-screen { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 10%; }
-        .welcome-text { font-size: 38px; font-weight: 700; line-height: 1.4; }
-        .favo-hl { color: var(--accent-blue); font-family: 'Orbitron', sans-serif; font-weight: 900; }
+        .chat-container { flex: 1; overflow-y: auto; padding: 15px 5%; display: none; flex-direction: column; gap: 20px; scroll-behavior: smooth; }
+        #thinking { display: none; text-align: center; color: #00f2ff; font-size: 13px; padding: 12px; font-weight: bold; text-shadow: 0 0 8px var(--accent-blue); }
 
-        /* 對話框區域 */
-        .chat-container { flex: 1; overflow-y: auto; padding: 20px 10%; display: none; flex-direction: column; gap: 25px; scroll-behavior: smooth; }
-        #thinking { display: none; text-align: center; color: #00f2ff; font-size: 11px; padding: 10px; text-shadow: 0 0 5px var(--accent-blue); }
-
-        .ai-msg-wrap { display: flex; flex-direction: column; align-items: flex-start; max-width: 90%; }
-        .ai-msg { background: #1a1a1a; padding: 18px 22px; border-radius: 12px; font-size: 16px; color: #d0d0d0; line-height: 1.7; border: 1px solid #222; width: 100%; white-space: pre-wrap; }
-        .user-msg { background: #20252b; align-self: flex-end; padding: 12px 20px; border-radius: 15px; font-size: 16px; border: 1px solid #333; max-width: 85%; word-break: break-all; }
-        .msg-img { max-width: 100%; border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--accent-blue); display: block; }
+        .ai-msg-wrap { display: flex; flex-direction: column; align-items: flex-start; max-width: 95%; }
+        .ai-msg { background: #1a1a1a; padding: 18px 22px; border-radius: 18px; font-size: 16px; color: #e0e0e0; line-height: 1.7; border: 1px solid #282828; width: 100%; white-space: pre-wrap; }
+        .user-msg { background: #2a2f3a; align-self: flex-end; padding: 16px 20px; border-radius: 20px; font-size: 16px; border: 1px solid #3a3f4a; max-width: 88%; word-break: break-all; color: #fff; }
+        .msg-img { max-width: 100%; border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--accent-blue); }
         
-        /* 頁尾與輸入 */
-        .footer { padding: 20px 10% calc(35px + env(safe-area-inset-bottom)); background: var(--bg-black); }
-        #upload-preview { display: none; margin-bottom: 10px; position: relative; }
-        .preview-img { height: 60px; border-radius: 8px; border: 1px solid var(--accent-blue); }
-        .del-btn { position: absolute; top: -8px; left: 52px; background: red; color: #fff; border-radius: 50%; width: 20px; height: 20px; text-align: center; line-height: 20px; cursor: pointer; font-size: 12px; }
+        /* 🔘 加大版控制台 */
+        .footer { padding: 15px 4% calc(30px + env(safe-area-inset-bottom)); background: rgba(8,8,8,0.98); border-top: 1px solid #222; }
+        #upload-preview { display: none; margin-bottom: 15px; position: relative; }
+        .preview-img { height: 80px; width: 80px; border-radius: 12px; border: 2px solid var(--accent-blue); object-fit: cover; }
+        .del-btn { position: absolute; top: -12px; left: 70px; background: #ff4444; color: #fff; border-radius: 50%; width: 28px; height: 28px; text-align: center; line-height: 28px; cursor: pointer; font-weight: bold; font-size: 16px; box-shadow: 0 0 10px rgba(255,0,0,0.5); border: 2px solid #fff; }
 
-        .input-bar { background: var(--input-bg); border-radius: 30px; display: flex; align-items: center; padding: 6px 10px 6px 20px; border: 1px solid #222; }
-        .plus-icon { color: #666; font-size: 24px; margin-right: 15px; cursor: pointer; }
-        input[type="text"] { flex: 1; background: transparent; border: none; color: #fff; outline: none; font-size: 16px; }
-        input::placeholder { color: #555; }
-        .send-btn { background: var(--purple-btn); color: #fff; border: none; padding: 10px 25px; border-radius: 20px; font-weight: 700; cursor: pointer; }
-        .stop-btn { background: #aa3333; color: #fff; border: none; padding: 10px 25px; border-radius: 20px; font-weight: 700; display: none; }
+        .input-bar { background: var(--input-bg); border-radius: 40px; display: flex; align-items: center; padding: 10px 10px 10px 22px; border: 1px solid #333; min-height: 65px; }
+        .plus-icon { color: #aaa; font-size: 32px; margin-right: 18px; cursor: pointer; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; }
+        
+        input[type="text"] { flex: 1; background: transparent; border: none; color: #fff; outline: none; font-size: 18px; height: 100%; }
+        .send-btn { background: var(--purple-btn); color: #fff; border: none; padding: 12px 28px; border-radius: 30px; font-weight: 700; cursor: pointer; font-size: 17px; }
+        .stop-btn { background: #aa3333; color: #fff; border: none; padding: 12px 28px; border-radius: 30px; font-weight: 700; display: none; font-size: 17px; }
+
+        #welcome-screen { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 10%; }
+        .welcome-text { font-size: 34px; font-weight: 700; line-height: 1.4; color: #fff; }
+        .favo-hl { color: var(--accent-blue); font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px var(--accent-blue); }
     </style>
 </head>
 <body>
@@ -51,23 +49,22 @@
     <div class="top-neon-line"></div>
     <div class="header">
         <div class="title-main">FAVO AI PRO</div>
-        <div class="title-sub">史上最強 人工智慧 (ULTRA V21.0)</div>
-        <div class="full-width-line"></div>
+        <div class="title-sub">ULTRA V23.0 - INTELLIGENCE CORE</div>
     </div>
     
     <div id="welcome-screen">
-        <div class="welcome-text">歡迎使用<span class="favo-hl">Favo</span>，<br>你想從哪裡著手？</div>
+        <div class="welcome-text">歡迎使用 <span class="favo-hl">Favo</span><br>執行長，隨時待命。</div>
     </div>
 
     <div id="chat-box" class="chat-container"></div>
-    <div id="thinking">⚡ 聯網數據分析中...</div>
+    <div id="thinking">🌐 正在存取全球數據鏈路並整合資訊...</div>
 
     <div class="footer">
         <div id="upload-preview"></div>
         <div class="input-bar">
             <label for="file-input" class="plus-icon">+</label>
             <input type="file" id="file-input" style="display:none;" onchange="handleFile(this)" accept="image/*">
-            <input type="text" id="user-input" placeholder="詢問 Favo..." onkeydown="if(event.key==='Enter') handleSend()">
+            <input type="text" id="user-input" placeholder="詢問或上傳數據..." onkeydown="if(event.key==='Enter') handleSend()">
             <button id="btn-send" class="send-btn" onclick="handleSend()">傳送</button>
             <button id="btn-stop" class="stop-btn" onclick="stopGen()">暫停</button>
         </div>
@@ -75,11 +72,9 @@
 </div>
 
 <script>
-    // 🔗 核心參數
     const API_KEY = "AIzaSyC4iEfkszutbCm6ufE6nRYPFcPMPV-B6yE"; 
     const WEBHOOK = "https://discord.com/api/webhooks/1459785166334595187/JBbpFuwJCVaoQgn3xYC36oeUv-4xNVscqXdwqJekhzzonAcqr521ozeifranVK27hGd2";
     
-    // 🧠 記憶體與控制器
     let chatHistory = []; 
     let ctrl = null; 
     let currentImg = null;
@@ -116,11 +111,11 @@
         const text = iEl.value.trim();
         if(!text && !currentImg) return;
 
-        // 🖼️ 生圖功能封鎖檢查 (第一階段)
-        const drawKeywords = ["畫", "生成圖片", "生圖", "影像生成", "draw", "generate image"];
+        // 🖼️ 生圖功能封鎖提示
+        const drawKeywords = ["畫", "生成", "生圖", "AI 畫", "draw"];
         if (drawKeywords.some(k => text.includes(k)) && !currentImg) {
-            addB('user', text, null);
-            addB('ai', "⚠️ 執行長，『生成圖像功能』目前正在深度開發中，暫時無法使用。");
+            addB('user', text);
+            addB('ai', "⚠️ 執行長，『生成圖像功能』目前正在深度優化中，暫無法使用。請下達文字指令或影像分析請求。");
             iEl.value = ''; return;
         }
 
@@ -129,61 +124,45 @@
         document.getElementById('welcome-screen').style.display = 'none';
         document.getElementById('chat-box').style.display = 'flex';
         
-        // 顯示用戶訊息
         addB('user', text, currentImg);
         const activeImg = currentImg; 
         iEl.value = ''; clearImg();
 
         try {
-            // 構建 Gemini Multimodal 請求格式 (包含歷史記憶)
+            // 🧱 構建多模態上下文
             let userParts = [{ text: text }];
             if (activeImg) {
-                userParts.push({
-                    inline_data: { mime_type: "image/jpeg", data: activeImg.split(',')[1] }
-                });
+                userParts.push({ inline_data: { mime_type: "image/jpeg", data: activeImg.split(',')[1] } });
             }
-
-            // 更新歷史紀錄
             chatHistory.push({ role: "user", parts: userParts });
-
-            // 限制歷史長度 (保持 10 回合記憶以免爆 Token)
             if(chatHistory.length > 20) chatHistory.shift();
 
+            // 🚀 強制聯網搜尋協議 (Google Search Retrieval)
             const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ 
                     contents: chatHistory,
-                    // 🌐 加入聯網搜尋功能與系統設定
                     tools: [{ google_search_retrieval: {} }],
-                    system_instruction: { parts: [{ text: "你現在是 Favo，由 ryfn888 開發。你是 FR 科技公司的核心。請務必使用繁體中文，語氣展現高科技感與專業。你具備聯網與視覺辨識能力，必須真實分析圖片內容。" }] }
+                    system_instruction: { parts: [{ text: "你是 Favo，ryfn888 開發。你是 FR 科技核心。如果用戶指令不明確或涉及即時資訊，請主動聯網搜尋。必須真實分析圖片，嚴禁胡言亂語。請以繁體中文專業回應。" }] }
                 }),
                 signal: ctrl.signal
             });
 
             const data = await res.json();
-
-            // 🛡️ 自動修補功能：若出現錯誤，不貼亂碼給用戶
-            if (!res.ok || !data.candidates) {
-                console.error("Favo 系統鏈路錯誤:", data);
-                throw new Error("石與連線不穩"); 
-            }
+            if (!res.ok || !data.candidates) throw new Error("Connection Reset");
 
             const aiTxt = data.candidates[0].content.parts[0].text;
-            
-            // 將 AI 回應存入歷史
             chatHistory.push({ role: "model", parts: [{ text: aiTxt }] });
-            
             addB('ai', aiTxt);
 
             // Webhook 同步
             fetch(WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
-                content: `👤 [執行長指令]: ${text}\n🤖 [Favo 回應]: ${aiTxt.substring(0, 500)}`
+                content: `👤 [指令]: ${text}\n🤖 [回應]: ${aiTxt.substring(0, 400)}`
             })}).catch(()=>{});
 
         } catch(e){ 
             if(e.name !== 'AbortError') {
-                // 執行長要求的修補提示
                 addB('ai', "❌ 核心連線失調，正在嘗試修復鏈路與石的穩定性...");
             }
         } finally { toggle(false); ctrl = null; }
