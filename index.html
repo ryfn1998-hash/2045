@@ -2,138 +2,127 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>⚡ FR科技公司 - 專業級 AI 程式碼生產器</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ FR科技公司 - AI 程式碼快速生產器</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;700;900&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; }
-        .code-font { font-family: 'JetBrains Mono', monospace; }
-        .loading { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+        /* 保持簡潔介面，增加手機滑動優化 */
+        pre::-webkit-scrollbar { width: 6px; height: 6px; }
+        pre::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
+        .loading-text { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     </style>
 </head>
-<body class="bg-[#f1f5f9] min-h-screen">
+<body class="bg-gray-100 min-h-screen">
 
-    <div class="max-w-4xl mx-auto pt-4 px-4 pb-10">
-        <header class="mb-4 flex flex-col items-center">
-            <h1 class="text-2xl font-black text-slate-900 tracking-tighter">⚡ FR 科技公司</h1>
-            <div class="h-1 w-8 bg-blue-600 rounded-full mt-1"></div>
+    <div class="max-w-5xl mx-auto py-10 px-4">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-extrabold text-gray-800 mb-2">⚡ FR 科技公司</h1>
+            <p class="text-gray-600 font-bold tracking-widest text-sm uppercase">AI 程式碼快速生產器</p>
         </header>
 
-        <div class="bg-white rounded-[2rem] shadow-xl p-5 mb-4 border border-slate-200">
-            <div class="space-y-4">
-                <div>
-                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Format / 格式</label>
-                    <select id="typeSelect" class="w-full mt-1 bg-slate-50 border border-slate-200 p-3 rounded-xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="HTML Webpage with Tailwind CSS">🌐 網頁程式</option>
-                        <option value="Python Script">🐍 Python 程式</option>
-                        <option value="Arduino C++">🤖 Arduino 控制</option>
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                
+                <div class="col-span-1">
+                    <label class="block text-xs font-bold text-gray-400 mb-1 uppercase">程式格式/類型</label>
+                    <select id="typeSelect" class="w-full border-gray-200 border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50 font-medium">
+                        <option value="HTML/Tailwind">🌐 網頁程式 (HTML/JS)</option>
+                        <option value="Python Script">🐍 Python 腳本</option>
+                        <option value="Arduino/C++">🤖 Arduino 控制</option>
                         <option value="SQL Query">🗄️ SQL 指令</option>
                     </select>
                 </div>
 
-                <div>
-                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Instruction / 指令</label>
-                    <div class="flex flex-col gap-2">
-                        <input type="text" id="userInput" placeholder="輸入需求 (例如：漸層文字)" 
-                               class="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 shadow-inner">
-                        <button onclick="runFR_Engine()" id="sendBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl transition-all active:scale-95 shadow-lg shadow-blue-200">
-                            發送指令
+                <div class="col-span-1 md:col-span-3">
+                    <label class="block text-xs font-bold text-gray-400 mb-1 uppercase">您的需求指令</label>
+                    <div class="relative flex flex-col md:flex-row gap-2">
+                        <input type="text" id="userInput" placeholder="例如：做一個發光的漸層文字..." 
+                               class="flex-grow border-gray-200 border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none shadow-inner">
+                        <button onclick="realGenerate()" id="sendBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3 rounded-lg transition-all active:scale-95 shadow-lg shadow-blue-200">
+                            發送
                         </button>
                     </div>
                 </div>
+
             </div>
         </div>
 
-        <div class="bg-[#0f172a] rounded-[2rem] shadow-2xl overflow-hidden">
-            <div class="flex items-center justify-between px-6 py-3 bg-[#1e293b]">
+        <div class="bg-[#1e2227] rounded-xl shadow-2xl overflow-hidden border border-gray-800">
+            <div class="flex items-center justify-between px-4 py-3 bg-[#282c34] border-b border-gray-700">
                 <div class="flex gap-1.5">
-                    <div class="w-2.5 h-2.5 rounded-full bg-red-500"></div>
-                    <div class="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
-                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
                 </div>
-                <div id="statusLabel" class="text-slate-500 text-[10px] font-mono tracking-widest uppercase">FR-Engine v1.5</div>
-                <button onclick="copyCode()" class="text-[10px] text-blue-400 font-bold uppercase">Copy</button>
+                <span class="text-gray-400 text-xs font-mono" id="outputStatus">READY</span>
+                <button onclick="copyCode()" class="text-[10px] bg-gray-700 hover:bg-gray-600 text-white py-1 px-3 rounded uppercase font-bold">
+                    複製程式碼
+                </button>
             </div>
-            <div class="p-6 min-h-[300px]">
-                <code id="codeOutput" class="code-font text-blue-100 text-sm leading-relaxed block whitespace-pre-wrap">// 等待指令中...</code>
-            </div>
+            <pre class="p-6 text-green-400 font-mono text-sm overflow-x-auto min-h-[400px] leading-relaxed" id="codeOutput">// 這裡將顯示 FR AI 生成的內容...</pre>
         </div>
-
-        <div id="previewBox" class="hidden mt-4">
-            <p class="text-[10px] font-bold text-slate-400 mb-2 ml-2 uppercase">Live Preview</p>
-            <div class="bg-white rounded-[2rem] shadow-lg overflow-hidden border border-slate-200">
-                <iframe id="previewFrame" class="w-full h-64 border-none"></iframe>
-            </div>
-        </div>
+        
+        <footer class="mt-8 text-center text-gray-400 text-[10px] tracking-widest uppercase font-bold">
+            © FR Technology Corp | Powered by Gemini API
+        </footer>
     </div>
 
     <script>
-        const API_KEY = 'AIzaSyC4iEfkszutbCm6ufE6nRYPFcPMPV-B6yE';
+        // 已經幫你埋好 API Key
+        const FR_KEY = 'AIzaSyC4iEfkszutbCm6ufE6nRYPFcPMPV-B6yE';
 
-        async function runFR_Engine() {
+        async function realGenerate() {
             const type = document.getElementById('typeSelect').value;
             const input = document.getElementById('userInput').value;
             const output = document.getElementById('codeOutput');
-            const status = document.getElementById('statusLabel');
+            const status = document.getElementById('outputStatus');
             const btn = document.getElementById('sendBtn');
-            const previewBox = document.getElementById('previewBox');
 
-            if (!input) return alert("請輸入指令");
+            if (!input.trim()) return alert("請輸入指令！");
 
             // UI 狀態切換
             btn.disabled = true;
-            btn.classList.add('loading');
-            btn.innerText = "FR AI 撰寫中...";
-            status.innerText = "CONNECTING...";
-            output.innerText = "// 正在連線至 FR 科技核心伺服器...";
-            previewBox.classList.add('hidden');
+            btn.classList.add('opacity-50');
+            status.innerText = "FR AI PROCESSING...";
+            status.classList.add('loading-text');
+            output.innerText = "/* 正在連線 FR 科技公司核心... \n   正在為您構建 " + type + " 程式碼... */";
 
             try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-                
-                const response = await fetch(url, {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${FR_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: `你是一位全能工程師，請直接給予程式碼，不要廢話。類型：${type}，需求：${input}` }] }]
+                        contents: [{
+                            parts: [{ text: `你是一位資深工程師。請根據以下格式產出程式碼，不要有任何開場白。類型：${type}，需求：${input}` }]
+                        }]
                     })
                 });
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error.message || "未知錯誤");
-                }
-
                 const data = await response.json();
-                let code = data.candidates[0].content.parts[0].text;
+                let result = data.candidates[0].content.parts[0].text;
                 
-                // 移除 Markdown
-                code = code.replace(/```[a-z]*\n/g, '').replace(/```/g, '').trim();
-
-                output.innerText = code;
-                status.innerText = "SUCCESS";
+                // 去除 AI 常用的 Markdown 符號
+                result = result.replace(/```[a-z]*\n/g, '').replace(/```/g, '').trim();
                 
-                if (type.includes("HTML")) {
-                    previewBox.classList.remove('hidden');
-                    document.getElementById('previewFrame').srcdoc = code;
-                }
+                output.innerText = result;
+                status.innerText = "EXECUTION SUCCESS";
+                status.classList.remove('loading-text');
 
-            } catch (err) {
-                console.error(err);
-                output.innerText = "⚠️ 錯誤報告：\n" + err.message + "\n\n[排錯建議]\n1. 請確認手機網路是否通暢。\n2. 如果是本地存檔打開，請嘗試上傳至 GitHub Pages。";
-                status.innerText = "FAILED";
+            } catch (error) {
+                output.innerText = "/* 錯誤：連線失敗 */\n可能原因：API 配額已滿或網路問題。";
+                status.innerText = "ERROR";
             } finally {
                 btn.disabled = false;
-                btn.classList.remove('loading');
-                btn.innerText = "發送指令";
+                btn.classList.remove('opacity-50');
             }
         }
 
         function copyCode() {
-            navigator.clipboard.writeText(document.getElementById('codeOutput').innerText);
-            alert("已複製！");
+            const text = document.getElementById('codeOutput').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("✅ FR 程式碼已複製！");
+            });
         }
     </script>
 </body>
