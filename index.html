@@ -6,41 +6,41 @@
     <title>Favo AI PRO Ultra - FR Tech</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+TC:wght@300;500;700&display=swap');
-        :root { --bg-black: #080808; --input-bg: #151515; --purple-btn: #5865f2; --accent-blue: #00f2ff; --purple-glow: #7000ff; }
+        :root { --bg-black: #080808; --input-bg: #1a1a1a; --purple-btn: #5865f2; --accent-blue: #00f2ff; --purple-glow: #7000ff; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body, html { margin: 0; padding: 0; background: var(--bg-black); color: #fff; height: 100dvh; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; }
 
-        /* 📱 手機大介面優化 */
-        .top-neon-line { height: 3px; width: 100%; background: linear-gradient(90deg, transparent, var(--purple-glow), var(--accent-blue), transparent); }
-        .header { padding: 25px 0 10px 0; text-align: center; }
-        .title-main { font-family: 'Orbitron', sans-serif; font-size: 26px; font-weight: 900; color: #58b9ff; letter-spacing: 2px; }
-        .title-sub { font-size: 11px; color: #58b9ff; font-weight: 500; letter-spacing: 3px; margin-top: 4px; opacity: 0.8; }
+        /* 📱 針對手機操作進行「超大化」處理 */
+        .top-neon-line { height: 4px; width: 100%; background: linear-gradient(90deg, transparent, var(--purple-glow), var(--accent-blue), transparent); }
+        .header { padding: 35px 0 15px 0; text-align: center; }
+        .title-main { font-family: 'Orbitron', sans-serif; font-size: 30px; font-weight: 900; color: #58b9ff; letter-spacing: 3px; text-shadow: 0 0 10px rgba(88,185,255,0.5); }
+        .title-sub { font-size: 13px; color: #58b9ff; font-weight: 500; letter-spacing: 4px; margin-top: 6px; opacity: 0.9; }
 
         #app { display: flex; flex-direction: column; height: 100dvh; }
-        .chat-container { flex: 1; overflow-y: auto; padding: 15px 5%; display: none; flex-direction: column; gap: 20px; scroll-behavior: smooth; }
-        #thinking { display: none; text-align: center; color: #00f2ff; font-size: 13px; padding: 12px; font-weight: bold; text-shadow: 0 0 8px var(--accent-blue); }
+        .chat-container { flex: 1; overflow-y: auto; padding: 20px 6%; display: none; flex-direction: column; gap: 25px; scroll-behavior: smooth; }
+        #thinking { display: none; text-align: center; color: #00f2ff; font-size: 15px; padding: 15px; font-weight: bold; text-shadow: 0 0 10px var(--accent-blue); }
 
-        .ai-msg-wrap { display: flex; flex-direction: column; align-items: flex-start; max-width: 95%; }
-        .ai-msg { background: #1a1a1a; padding: 18px 22px; border-radius: 18px; font-size: 16px; color: #e0e0e0; line-height: 1.7; border: 1px solid #282828; width: 100%; white-space: pre-wrap; }
-        .user-msg { background: #2a2f3a; align-self: flex-end; padding: 16px 20px; border-radius: 20px; font-size: 16px; border: 1px solid #3a3f4a; max-width: 88%; word-break: break-all; color: #fff; }
-        .msg-img { max-width: 100%; border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--accent-blue); }
+        .ai-msg-wrap { display: flex; flex-direction: column; align-items: flex-start; max-width: 96%; }
+        .ai-msg { background: #1a1a1a; padding: 20px 24px; border-radius: 20px; font-size: 17px; color: #e0e0e0; line-height: 1.8; border: 1px solid #333; width: 100%; white-space: pre-wrap; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .user-msg { background: #313745; align-self: flex-end; padding: 18px 22px; border-radius: 22px; font-size: 17px; border: 1px solid #4a5161; max-width: 90%; word-break: break-all; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .msg-img { max-width: 100%; border-radius: 15px; margin-bottom: 10px; border: 2px solid var(--accent-blue); }
         
-        /* 🔘 加大版控制台 */
-        .footer { padding: 15px 4% calc(30px + env(safe-area-inset-bottom)); background: rgba(8,8,8,0.98); border-top: 1px solid #222; }
-        #upload-preview { display: none; margin-bottom: 15px; position: relative; }
-        .preview-img { height: 80px; width: 80px; border-radius: 12px; border: 2px solid var(--accent-blue); object-fit: cover; }
-        .del-btn { position: absolute; top: -12px; left: 70px; background: #ff4444; color: #fff; border-radius: 50%; width: 28px; height: 28px; text-align: center; line-height: 28px; cursor: pointer; font-weight: bold; font-size: 16px; box-shadow: 0 0 10px rgba(255,0,0,0.5); border: 2px solid #fff; }
+        /* 🔘 超大控制台：解決難以操控的問題 */
+        .footer { padding: 20px 5% calc(35px + env(safe-area-inset-bottom)); background: #0a0a0a; border-top: 1px solid #222; }
+        #upload-preview { display: none; margin-bottom: 20px; position: relative; }
+        .preview-img { height: 100px; width: 100px; border-radius: 15px; border: 3px solid var(--accent-blue); object-fit: cover; }
+        .del-btn { position: absolute; top: -15px; left: 85px; background: #ff3333; color: #fff; border-radius: 50%; width: 35px; height: 35px; text-align: center; line-height: 35px; cursor: pointer; font-weight: 900; font-size: 20px; border: 3px solid #fff; box-shadow: 0 0 15px rgba(255,0,0,0.6); }
 
-        .input-bar { background: var(--input-bg); border-radius: 40px; display: flex; align-items: center; padding: 10px 10px 10px 22px; border: 1px solid #333; min-height: 65px; }
-        .plus-icon { color: #aaa; font-size: 32px; margin-right: 18px; cursor: pointer; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; }
+        .input-bar { background: var(--input-bg); border-radius: 45px; display: flex; align-items: center; padding: 12px 12px 12px 25px; border: 2px solid #3a3a3a; min-height: 75px; }
+        .plus-icon { color: #fff; font-size: 38px; margin-right: 20px; cursor: pointer; width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; background: #333; border-radius: 50%; }
         
-        input[type="text"] { flex: 1; background: transparent; border: none; color: #fff; outline: none; font-size: 18px; height: 100%; }
-        .send-btn { background: var(--purple-btn); color: #fff; border: none; padding: 12px 28px; border-radius: 30px; font-weight: 700; cursor: pointer; font-size: 17px; }
-        .stop-btn { background: #aa3333; color: #fff; border: none; padding: 12px 28px; border-radius: 30px; font-weight: 700; display: none; font-size: 17px; }
+        input[type="text"] { flex: 1; background: transparent; border: none; color: #fff; outline: none; font-size: 19px; height: 100%; }
+        .send-btn { background: var(--purple-btn); color: #fff; border: none; padding: 15px 35px; border-radius: 35px; font-weight: 900; cursor: pointer; font-size: 18px; box-shadow: 0 4px 10px rgba(88,101,242,0.4); }
+        .stop-btn { background: #cc3333; color: #fff; border: none; padding: 15px 35px; border-radius: 35px; font-weight: 900; display: none; font-size: 18px; }
 
-        #welcome-screen { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 10%; }
-        .welcome-text { font-size: 34px; font-weight: 700; line-height: 1.4; color: #fff; }
-        .favo-hl { color: var(--accent-blue); font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px var(--accent-blue); }
+        #welcome-screen { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 8%; }
+        .welcome-text { font-size: 38px; font-weight: 900; line-height: 1.5; color: #fff; }
+        .favo-hl { color: var(--accent-blue); font-family: 'Orbitron', sans-serif; text-shadow: 0 0 20px var(--accent-blue); }
     </style>
 </head>
 <body>
@@ -49,15 +49,15 @@
     <div class="top-neon-line"></div>
     <div class="header">
         <div class="title-main">FAVO AI PRO</div>
-        <div class="title-sub">ULTRA V23.0 - INTELLIGENCE CORE</div>
+        <div class="title-sub">ULTRA V24.0 - FINAL CORE</div>
     </div>
     
     <div id="welcome-screen">
-        <div class="welcome-text">歡迎使用 <span class="favo-hl">Favo</span><br>執行長，隨時待命。</div>
+        <div class="welcome-text">歡迎使用 <span class="favo-hl">Favo</span><br>請下達指令，執行長。</div>
     </div>
 
     <div id="chat-box" class="chat-container"></div>
-    <div id="thinking">🌐 正在存取全球數據鏈路並整合資訊...</div>
+    <div id="thinking">🌐 聯網搜尋與石之鏈路同步中...</div>
 
     <div class="footer">
         <div id="upload-preview"></div>
@@ -72,8 +72,8 @@
 </div>
 
 <script>
+    // ⚠️ 請執行長務必確認此 API_KEY 與 Google AI Studio 內一致
     const API_KEY = "AIzaSyC4iEfkszutbCm6ufE6nRYPFcPMPV-B6yE"; 
-    const WEBHOOK = "https://discord.com/api/webhooks/1459785166334595187/JBbpFuwJCVaoQgn3xYC36oeUv-4xNVscqXdwqJekhzzonAcqr521ozeifranVK27hGd2";
     
     let chatHistory = []; 
     let ctrl = null; 
@@ -111,14 +111,6 @@
         const text = iEl.value.trim();
         if(!text && !currentImg) return;
 
-        // 🖼️ 生圖功能封鎖提示
-        const drawKeywords = ["畫", "生成", "生圖", "AI 畫", "draw"];
-        if (drawKeywords.some(k => text.includes(k)) && !currentImg) {
-            addB('user', text);
-            addB('ai', "⚠️ 執行長，『生成圖像功能』目前正在深度優化中，暫無法使用。請下達文字指令或影像分析請求。");
-            iEl.value = ''; return;
-        }
-
         toggle(true); 
         ctrl = new AbortController();
         document.getElementById('welcome-screen').style.display = 'none';
@@ -129,7 +121,6 @@
         iEl.value = ''; clearImg();
 
         try {
-            // 🧱 構建多模態上下文
             let userParts = [{ text: text }];
             if (activeImg) {
                 userParts.push({ inline_data: { mime_type: "image/jpeg", data: activeImg.split(',')[1] } });
@@ -137,33 +128,32 @@
             chatHistory.push({ role: "user", parts: userParts });
             if(chatHistory.length > 20) chatHistory.shift();
 
-            // 🚀 強制聯網搜尋協議 (Google Search Retrieval)
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+            // 🛠️ 終極修復：簡化請求結構，強制使用最高相容性模式
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ 
                     contents: chatHistory,
                     tools: [{ google_search_retrieval: {} }],
-                    system_instruction: { parts: [{ text: "你是 Favo，ryfn888 開發。你是 FR 科技核心。如果用戶指令不明確或涉及即時資訊，請主動聯網搜尋。必須真實分析圖片，嚴禁胡言亂語。請以繁體中文專業回應。" }] }
+                    system_instruction: { parts: [{ text: "你是 Favo，ryfn888 開發。你是 FR 科技公司核心。若用戶指令不明或需要最新資訊，請主動聯網搜尋。必須真實讀取圖片，禁止虛構內容。語氣專業。" }] }
                 }),
                 signal: ctrl.signal
             });
 
-            const data = await res.json();
-            if (!res.ok || !data.candidates) throw new Error("Connection Reset");
+            const result = await response.json();
 
-            const aiTxt = data.candidates[0].content.parts[0].text;
+            if (!response.ok || !result.candidates) {
+                throw new Error("Link broken");
+            }
+
+            const aiTxt = result.candidates[0].content.parts[0].text;
             chatHistory.push({ role: "model", parts: [{ text: aiTxt }] });
             addB('ai', aiTxt);
 
-            // Webhook 同步
-            fetch(WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
-                content: `👤 [指令]: ${text}\n🤖 [回應]: ${aiTxt.substring(0, 400)}`
-            })}).catch(()=>{});
-
         } catch(e){ 
             if(e.name !== 'AbortError') {
-                addB('ai', "❌ 核心連線失調，正在嘗試修復鏈路與石的穩定性...");
+                // 執行長指示：顯示修復提示而非亂碼
+                addB('ai', "❌ 核心連線失調，正在嘗試修復系統錯誤...");
             }
         } finally { toggle(false); ctrl = null; }
     }
@@ -174,7 +164,7 @@
         w.className = role === 'user' ? 'user-msg' : 'ai-msg-wrap';
         let html = (img) ? `<img src="${img}" class="msg-img">` : '';
         if (role === 'user') {
-            html += content || (img ? "[傳送影像數據]" : "");
+            html += content || (img ? "[傳送數據影像]" : "");
         } else {
             html += `<div class="ai-msg">${content}</div>`;
         }
