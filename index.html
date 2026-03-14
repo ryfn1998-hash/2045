@@ -10,7 +10,6 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body, html { margin: 0; padding: 0; background: var(--bg-black); color: #fff; height: 100dvh; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; }
 
-        /* 🟣 頂部視覺鎖定 */
         .top-neon-line { height: 2px; width: 100%; background: linear-gradient(90deg, transparent, var(--purple-glow), var(--accent-blue), transparent); }
         .header { padding: 30px 0 0 0; text-align: center; }
         .title-main { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 900; color: #58b9ff; letter-spacing: 3px; }
@@ -22,19 +21,17 @@
         .welcome-text { font-size: 38px; font-weight: 700; line-height: 1.4; }
         .favo-hl { color: var(--accent-blue); font-family: 'Orbitron', sans-serif; font-weight: 900; }
 
-        .chat-container { flex: 1; overflow-y: auto; padding: 20px 12%; display: none; flex-direction: column; gap: 25px; }
+        .chat-container { flex: 1; overflow-y: auto; padding: 20px 10%; display: none; flex-direction: column; gap: 25px; }
         #thinking { display: none; text-align: center; color: #00f2ff; font-size: 11px; padding: 10px; text-shadow: 0 0 5px var(--accent-blue); }
 
-        /* 💬 對話與影像顯示 */
-        .ai-msg-wrap { display: flex; flex-direction: column; align-items: flex-start; max-width: 85%; }
-        .ai-msg { background: #1a1a1a; padding: 18px 22px; border-radius: 12px; font-size: 16px; color: #d0d0d0; line-height: 1.7; border: 1px solid #222; width: 100%; }
+        .ai-msg-wrap { display: flex; flex-direction: column; align-items: flex-start; max-width: 90%; }
+        .ai-msg { background: #1a1a1a; padding: 18px 22px; border-radius: 12px; font-size: 16px; color: #d0d0d0; line-height: 1.7; border: 1px solid #222; width: 100%; white-space: pre-wrap; }
         .user-msg { background: #20252b; align-self: flex-end; padding: 12px 20px; border-radius: 15px; font-size: 16px; border: 1px solid #333; max-width: 85%; word-break: break-all; }
         .msg-img { max-width: 100%; border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--accent-blue); display: block; }
         
         .action-btns { display: flex; gap: 10px; margin-top: 8px; }
         .btn-small { background: #2a2a2a; color: #888; border: none; padding: 5px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; }
 
-        /* 🔘 底部輸入框與預覽 */
         .footer { padding: 20px 10% calc(35px + env(safe-area-inset-bottom)); background: var(--bg-black); }
         #upload-preview { display: none; margin-bottom: 10px; position: relative; }
         .preview-img { height: 60px; border-radius: 8px; border: 1px solid var(--accent-blue); }
@@ -80,15 +77,11 @@
 </div>
 
 <script>
-    // 🔗 核心配置
     const API_KEY = "AIzaSyC4iEfkszutbCm6ufE6nRYPFcPMPV-B6yE"; 
     const WEBHOOK = "https://discord.com/api/webhooks/1459785166334595187/JBbpFuwJCVaoQgn3xYC36oeUv-4xNVscqXdwqJekhzzonAcqr521ozeifranVK27hGd2";
     
-    let ctrl = null; 
-    let lastTxt = ""; 
-    let currentImg = null;
+    let ctrl = null; let lastTxt = ""; let currentImg = null;
 
-    // 🖼️ 處理圖片上傳預覽
     function handleFile(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
@@ -103,18 +96,14 @@
     }
     function clearImg() { currentImg = null; document.getElementById('upload-preview').style.display = 'none'; }
 
-    // 📡 同步至 Discord Webhook
     async function syncDc(u, a, type, imgUrl = null) {
         try {
             fetch(WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
                 username: "💎 FAVO_ULTRA_SYNC",
                 embeds: [{
-                    title: type === 'image' ? "🎨 影像生成同步" : "💬 核心數據對話",
-                    color: type === 'image' ? 10181046 : 5814783,
-                    fields: [
-                        { name: "👤 指令", value: u || "影像請求" },
-                        { name: "🤖 回應", value: a.substring(0, 800) }
-                    ],
+                    title: "💬 核心數據同步",
+                    color: 5814783,
+                    fields: [{ name: "👤 指令", value: u || "影像請求" }, { name: "🤖 回應", value: a.substring(0, 1000) }],
                     image: imgUrl ? { url: imgUrl } : null,
                     timestamp: new Date().toISOString()
                 }]
@@ -131,95 +120,76 @@
     function stopGen() { if(ctrl){ ctrl.abort(); toggle(false); } }
 
     async function handleSend(reGen = null) {
-        const inputEl = document.getElementById('user-input');
-        const text = reGen || inputEl.value.trim();
-        if(!text && !currentImg) return;
+        const i = document.getElementById('user-input');
+        const t = reGen || i.value.trim();
+        if(!t && !currentImg) return;
 
-        toggle(true); 
-        ctrl = new AbortController();
+        toggle(true); ctrl = new AbortController();
         document.getElementById('welcome-screen').style.display = 'none';
-        const chatBox = document.getElementById('chat-box');
-        chatBox.style.display = 'flex';
+        document.getElementById('chat-box').style.display = 'flex';
         
-        if(!reGen) { addB('user', text, currentImg); lastTxt = text; }
-        const activeImg = currentImg; 
-        inputEl.value = ''; clearImg();
+        if(!reGen) { addB('user', t, currentImg); lastTxt = t; }
+        const activeImg = currentImg; i.value = ''; clearImg();
+
+        // 🚀 關鍵檢查：封鎖影像生成
+        const drawKeywords = ["畫", "生成圖片", "生成影像", "draw", "generate image", "圖片生成"];
+        if (drawKeywords.some(k => t.includes(k)) && !activeImg) {
+            setTimeout(() => {
+                addB('ai', "⚠️ 執行長，目前『生成圖像功能』正在深度開發與優化中，暫時無法提供服務。請嘗試其他文字指令或影像分析需求。");
+                toggle(false);
+            }, 600);
+            return;
+        }
 
         try {
-            const drawKeywords = ["畫", "生成", "draw", "generate", "圖片"];
-            
-            // 🎨 功能 A：Pollinations 影像生成
-            if (drawKeywords.some(k => text.includes(k)) && !activeImg) {
-                const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random()*999999)}`;
-                addB('ai', "根據您的指令，執行長，影像已完成渲染。", imgUrl, 'image');
-                syncDc(text, "IMAGE_RES_SUCCESS", "image", imgUrl);
-            } 
-            // 💎 功能 B：真正的 Gemini AI 對話核心
-            else {
-                const sysPrompt = "你現在是 Favo，由 ryfn888 開發。你是 FR 科技公司的核心。請務必使用繁體中文，展現出專業的高科技語氣。";
-                
-                let bodyData = {
-                    contents: [{
-                        parts: [{ text: sysPrompt + "\n使用者問題：" + text }]
-                    }]
-                };
+            const sys = "你現在是 Favo，由 ryfn888 開發。你是 FR 科技公司的核心。請務必使用繁體中文，語氣展現高科技感與專業。";
+            let bodyData = { contents: [{ parts: [{ text: sys + "\n指令：" + t }] }] };
 
-                // 處理 Base64 影像發送給 Gemini
-                if (activeImg) {
-                    const base64Data = activeImg.split(',')[1];
-                    bodyData.contents[0].parts.push({
-                        inline_data: { mime_type: "image/jpeg", data: base64Data }
-                    });
-                }
-
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(bodyData),
-                    signal: ctrl.signal
+            if (activeImg) {
+                bodyData.contents[0].parts.push({
+                    inline_data: { mime_type: "image/jpeg", data: activeImg.split(',')[1] }
                 });
-
-                const data = await res.json();
-                const aiResponse = data.candidates[0].content.parts[0].text;
-
-                addB('ai', aiResponse);
-                syncDc(text, aiResponse, 'text', activeImg);
             }
+
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(bodyData),
+                signal: ctrl.signal
+            });
+
+            if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+            const data = await res.json();
+            const aiText = data.candidates[0].content.parts[0].text;
+
+            addB('ai', aiText);
+            syncDc(t, aiText, 'text', activeImg);
         } catch(e){ 
-            if(e.name !== 'AbortError') addB('ai', "❌ 鏈路中斷，請確認網路環境。"); 
-        } finally { 
-            toggle(false); ctrl = null; 
-        }
+            if(e.name !== 'AbortError') {
+                console.error(e);
+                addB('ai', "❌ 鏈路協議中斷。原因可能是：API 金鑰無效、配額已滿或網路安全政策限制。");
+            }
+        } finally { toggle(false); ctrl = null; }
     }
 
-    function addB(role, content, img = null, type = 'text') {
+    function addB(role, content, img = null) {
         const cb = document.getElementById('chat-box');
         const w = document.createElement('div');
         w.className = role === 'user' ? 'user-msg' : 'ai-msg-wrap';
         
-        let html = '';
-        if (img) html += `<img src="${img}" class="msg-img">`;
-        
+        let html = (img) ? `<img src="${img}" class="msg-img">` : '';
         if (role === 'user') {
             html += content;
         } else {
-            // 處理換行
-            const formatted = content.replace(/\n/g, '<br>');
-            html += `<div class="ai-msg">${formatted}</div>`;
-            
+            html += `<div class="ai-msg">${content}</div>`;
             const btns = document.createElement('div');
             btns.className = 'action-btns';
-            if (type === 'image') {
-                btns.innerHTML = `<button class="btn-small" onclick="window.open('${img}')">高清預覽</button>`;
-            } else {
-                btns.innerHTML = `<button class="btn-small" onclick="navigator.clipboard.writeText('${content.replace(/'/g,"")}')">複製</button><button class="btn-small" onclick="handleSend(lastTxt)">重新生成</button>`;
-            }
+            btns.innerHTML = `<button class="btn-small" onclick="navigator.clipboard.writeText('${content.replace(/['"\n]/g," ")}')">複製數據</button><button class="btn-small" onclick="handleSend(lastTxt)">重啟程序</button>`;
             html += btns.outerHTML;
         }
         
         w.innerHTML = html;
-        cb.appendChild(w); 
-        cb.scrollTop = cb.scrollHeight;
+        cb.appendChild(w); cb.scrollTop = cb.scrollHeight;
     }
 </script>
 </body>
