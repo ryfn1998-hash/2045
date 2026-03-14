@@ -77,11 +77,11 @@
 </div>
 
 <script>
-    // 關鍵配置
+    // 🔗 核心配置
     const API_KEY = "AIzaSyC4iEfkszutbCm6ufE6nRYPFcPMPV-B6yE"; 
-    const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
     const WEBHOOK = "https://discord.com/api/webhooks/1459785166334595187/JBbpFuwJCVaoQgn3xYC36oeUv-4xNVscqXdwqJekhzzonAcqr521ozeifranVK27hGd2";
-    
+    const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+
     let ctrl = null; let lastTxt = ""; let currentImg = null;
 
     function handleFile(input) {
@@ -96,16 +96,24 @@
             reader.readAsDataURL(input.files[0]);
         }
     }
-    function clearImg() { currentImg = null; document.getElementById('upload-preview').style.display = 'none'; }
+
+    function clearImg() { 
+        currentImg = null; 
+        document.getElementById('upload-preview').style.display = 'none'; 
+        document.getElementById('file-input').value = "";
+    }
 
     async function syncDc(u, a, type, imgUrl = null) {
         try {
             fetch(WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
                 username: "💎 FAVO_ULTRA_SYNC",
                 embeds: [{
-                    title: "💬 核心數據對話",
+                    title: "💬 核心數據同步",
                     color: 5814783,
-                    fields: [{ name: "👤 指令", value: u || "影像請求" }, { name: "🤖 回應", value: a.substring(0, 1000) }],
+                    fields: [
+                        { name: "👤 使用者指令", value: u || "影像請求" },
+                        { name: "🤖 Favo 回應", value: a.substring(0, 1000) }
+                    ],
                     image: imgUrl ? { url: imgUrl } : null,
                     timestamp: new Date().toISOString()
                 }]
@@ -122,57 +130,61 @@
     function stopGen() { if(ctrl){ ctrl.abort(); toggle(false); } }
 
     async function handleSend(reGen = null) {
-        const inputEl = document.getElementById('user-input');
-        const text = reGen || inputEl.value.trim();
+        const iEl = document.getElementById('user-input');
+        const text = reGen || iEl.value.trim();
         if(!text && !currentImg) return;
 
-        toggle(true); ctrl = new AbortController();
+        toggle(true); 
+        ctrl = new AbortController();
         document.getElementById('welcome-screen').style.display = 'none';
-        document.getElementById('chat-box').style.display = 'flex';
+        const chatBox = document.getElementById('chat-box');
+        chatBox.style.display = 'flex';
         
         if(!reGen) { addB('user', text, currentImg); lastTxt = text; }
-        const activeImg = currentImg; inputEl.value = ''; clearImg();
+        const activeImg = currentImg; 
+        iEl.value = ''; clearImg();
 
-        // 🖼️ 影像生成封鎖邏輯
-        const drawKeywords = ["畫", "生成圖片", "生成影像", "draw", "generate", "圖片生成"];
+        // 🖼️ 影像生成封鎖檢查
+        const drawKeywords = ["畫", "生成", "圖片", "影像", "draw", "generate", "image", "pic"];
         if (drawKeywords.some(k => text.includes(k)) && !activeImg) {
             setTimeout(() => {
-                addB('ai', "⚠️ 執行長，目前『生成圖像功能』正在開發中，暫時無法使用。請輸入文字指令。");
+                addB('ai', "⚠️ 執行長，『生成圖像功能』目前正在深度開發與優化中，暫時無法提供服務。請嘗試文字指令或影像分析。");
                 toggle(false);
-            }, 500);
+            }, 600);
             return;
         }
 
         try {
-            const sysPrompt = "你現在是 Favo，由 ryfn888 開發。你是 FR 科技公司的核心。請務必使用繁體中文。";
-            let parts = [{ text: sysPrompt + "\n指令：" + text }];
+            const sys = "你現在是 Favo，由 ryfn888 開發。你是 FR 科技公司的核心。請務必使用繁體中文，展現高科技感與專業語氣。";
+            let contents = [{ parts: [{ text: sys + "\n指令內容：" + text }] }];
 
             if (activeImg) {
-                parts.push({
+                contents[0].parts.push({
                     inline_data: { mime_type: "image/jpeg", data: activeImg.split(',')[1] }
                 });
             }
 
-            const res = await fetch(`${API_URL}?key=${API_KEY}`, {
+            const res = await fetch(`${ENDPOINT}?key=${API_KEY}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ contents: [{ parts: parts }] }),
+                body: JSON.stringify({ contents: contents }),
                 signal: ctrl.signal
             });
 
             if (!res.ok) {
-                const errData = await res.json();
-                throw new Error(`Code: ${res.status} | ${errData.error.message}`);
+                const err = await res.json();
+                throw new Error(`Code ${res.status}: ${err.error.message}`);
             }
 
             const data = await res.json();
-            const aiText = data.candidates[0].content.parts[0].text;
+            const aiTxt = data.candidates[0].content.parts[0].text;
 
-            addB('ai', aiText);
-            syncDc(text, aiText, 'text', activeImg);
+            addB('ai', aiTxt);
+            syncDc(text, aiTxt, 'text', activeImg);
         } catch(e){ 
             if(e.name !== 'AbortError') {
-                addB('ai', `❌ 鏈路中斷。系統反饋：${e.message}`);
+                addB('ai', `❌ 鏈路協議異常。\n診斷結果：${e.message}`);
+                console.error("Favo 系統錯誤回報:", e);
             }
         } finally { toggle(false); ctrl = null; }
     }
@@ -189,12 +201,13 @@
             html += `<div class="ai-msg">${content}</div>`;
             const btns = document.createElement('div');
             btns.className = 'action-btns';
-            btns.innerHTML = `<button class="btn-small" onclick="navigator.clipboard.writeText('${content.replace(/['"\n]/g," ")}')">複製</button><button class="btn-small" onclick="handleSend(lastTxt)">重新載入</button>`;
+            btns.innerHTML = `<button class="btn-small" onclick="navigator.clipboard.writeText('${content.replace(/['"\n]/g," ")}')">複製數據</button><button class="btn-small" onclick="handleSend(lastTxt)">重新生成</button>`;
             html += btns.outerHTML;
         }
         
         w.innerHTML = html;
-        cb.appendChild(w); cb.scrollTop = cb.scrollHeight;
+        cb.appendChild(w); 
+        cb.scrollTop = cb.scrollHeight;
     }
 </script>
 </body>
