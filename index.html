@@ -3,115 +3,465 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>⚡ FR 科技公司 - AI 程式碼快速生產器</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Neon Rivals - Mobile & PC Edition</title>
     <style>
-        pre { white-space: pre-wrap; word-wrap: break-word; }
-        .btn-loading { opacity: 0.5; pointer-events: none; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none; /* 防止手機雙擊縮放或滑動網頁頁面 */
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #050508;
+            font-family: 'Segoe UI', Impact, Arial, sans-serif;
+        }
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* ================= 遊戲 UI 介面 (HUD) ================= */
+        #ui-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+        }
+        .hud-top { display: flex; justify-content: space-between; width: 100%; }
+        .match-status {
+            background: rgba(255, 0, 127, 0.1);
+            border: 2px solid #ff007f;
+            box-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
+            color: #fff;
+            padding: 6px 15px;
+            font-size: 16px;
+            font-weight: 900;
+            transform: skewX(-15deg);
+        }
+        #kill-feed { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
+        .kill-msg {
+            background: rgba(0, 0, 0, 0.6);
+            border-left: 4px solid #00ffff;
+            padding: 6px 12px;
+            color: #fff;
+            font-size: 12px;
+        }
+        .kill-msg span.killer { color: #00ffff; }
+        .kill-msg span.weapon { color: #ffff00; margin: 0 3px; }
+        .kill-msg span.victim { color: #ff007f; }
+
+        .hud-bottom { display: flex; justify-content: space-between; width: 100%; align-items: flex-end;}
+        .health-container {
+            background: rgba(15, 15, 25, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            width: 180px;
+            transform: skewX(-10deg);
+        }
+        .health-bar-bg { width: 100%; height: 10px; background: rgba(255, 255, 255, 0.05); }
+        .health-bar-fill { width: 100%; height: 100%; background: #ff007f; box-shadow: 0 0 8px #ff007f; }
+        .ammo-container {
+            background: rgba(15, 15, 25, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            transform: skewX(-10deg);
+        }
+        .ammo-count { color: #00ffff; font-size: 24px; font-weight: bold; text-shadow: 0 0 8px #00ffff; }
+
+        #crosshair {
+            position: absolute; top: 50%; left: 50%; width: 16px; height: 16px;
+            transform: translate(-50%, -50%); pointer-events: none; z-index: 10;
+        }
+        #crosshair::before, #crosshair::after { content: ''; position: absolute; background: #00ffff; }
+        #crosshair::before { top: 7px; left: 0; width: 16px; height: 2px; }
+        #crosshair::after { top: 0; left: 7px; width: 2px; height: 16px; }
+
+        /* ================= 📱 手機專用虛擬按鍵 UI (預設隱藏) ================= */
+        #mobile-controls {
+            position: absolute;
+            bottom: 30px; left: 0; width: 100%;
+            display: none; /* 透過 JS 偵測如果是手機才會開啟 */
+            justify-content: space-between;
+            padding: 0 40px;
+            z-index: 15;
+        }
+        /* 左側虛擬搖桿區域 */
+        .joystick-zone {
+            width: 120px; height: 120px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px dashed rgba(0, 255, 255, 0.3);
+            border-radius: 50%;
+            position: relative;
+            display: flex; justify-content: center; align-items: center;
+            pointer-events: auto;
+        }
+        .joystick-stick {
+            width: 50px; height: 50px;
+            background: rgba(0, 255, 255, 0.2);
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 10px #00ffff;
+            border-radius: 50%;
+            position: absolute;
+        }
+        /* 右側開槍按鈕 */
+        .fire-btn {
+            width: 90px; height: 90px;
+            background: rgba(255, 0, 127, 0.2);
+            border: 3px solid #ff007f;
+            box-shadow: 0 0 15px #ff007f;
+            border-radius: 50%;
+            color: #fff; font-weight: bold; font-size: 18px;
+            display: flex; justify-content: center; align-items: center;
+            pointer-events: auto;
+            transform: scale(1);
+            transition: transform 0.1s;
+        }
+        .fire-btn:active { transform: scale(0.9); background: rgba(255, 0, 127, 0.5); }
+
+        /* 開始提示 */
+        #instructions {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 5, 8, 0.95);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            color: #fff; cursor: pointer; z-index: 20; text-align: center; padding: 20px;
+        }
+        #instructions h1 { font-size: 40px; color: #ff007f; text-shadow: 0 0 15px #ff007f; margin-bottom: 10px; }
+        #instructions p { color: #00ffff; text-shadow: 0 0 5px #00ffff; }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body>
 
-    <div class="max-w-4xl mx-auto py-10 px-4">
-        <header class="mb-8 text-center">
-            <h1 class="text-3xl font-black text-gray-800">⚡ FR 科技公司</h1>
-            <p class="text-gray-400 text-[10px] tracking-[0.3em] font-bold uppercase mt-2">AI 程式碼快速生產器</p>
-        </header>
+    <div id="instructions">
+        <h1>NEON RIVALS</h1>
+        <p id="start-prompt">▶ 點擊畫面進入競技場 ◀</p>
+    </div>
 
-        <div class="bg-white rounded-3xl shadow-xl p-6 mb-6 border border-gray-100">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="col-span-1">
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 ml-1">程式格式/類型</label>
-                    <select id="typeSelect" class="w-full border-gray-200 border-2 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50 font-bold">
-                        <option value="HTML網頁程式">🌐 網頁程式</option>
-                        <option value="Python程式碼">🐍 Python 腳本</option>
-                        <option value="Arduino控制碼">🤖 Arduino 控制</option>
-                        <option value="SQL資料庫格式">🗄️ SQL 指令</option>
-                    </select>
-                </div>
-                <div class="col-span-1 md:col-span-3">
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 ml-1">您的需求指令</label>
-                    <div class="flex flex-col md:flex-row gap-2">
-                        <input type="text" id="userInput" placeholder="輸入需求 (例如：做一個發光的按鈕)" 
-                               class="flex-grow border-gray-200 border-2 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none shadow-inner">
-                        <button onclick="frPowerOn()" id="sendBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-black px-10 py-3 rounded-xl transition-all shadow-lg">
-                            發送
-                        </button>
-                    </div>
-                </div>
-            </div>
+    <!-- 遊戲 HUD -->
+    <div id="ui-layer">
+        <div class="hud-top">
+            <div class="match-status">1v1 ARENA Remake</div>
+            <div id="kill-feed"></div>
         </div>
-
-        <div class="bg-[#1e2227] rounded-3xl shadow-2xl overflow-hidden border border-gray-800">
-            <div class="flex items-center justify-between px-6 py-4 bg-[#282c34]">
-                <div class="flex gap-1.5">
-                    <div class="w-2.5 h-2.5 rounded-full bg-red-500"></div>
-                    <div class="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
-                    <div class="w-2.5 h-2.5 rounded-full bg-green-500"></div>
-                </div>
-                <span class="text-gray-500 text-[10px] font-mono font-bold uppercase tracking-widest" id="statusLabel">SYSTEM READY</span>
-                <button onclick="copyCode()" class="text-[10px] font-bold text-blue-400 uppercase">複製</button>
-            </div>
-            <div class="p-6 min-h-[400px]">
-                <pre id="codeOutput" class="text-green-400 font-mono text-sm leading-relaxed">// 這裡將顯示 FR AI 的生成結果...</pre>
-            </div>
+        <div class="hud-bottom">
+            <div class="health-container"><div class="health-bar-bg"><div class="health-bar-fill"></div></div></div>
+            <div class="ammo-container"><div class="ammo-count" id="ammoDisplay">30/30</div></div>
         </div>
     </div>
 
+    <!-- 📱 手機觸控按鍵層 -->
+    <div id="mobile-controls">
+        <div class="joystick-zone" id="joystickZone">
+            <div class="joystick-stick" id="joystickStick"></div>
+        </div>
+        <div class="fire-btn" id="fireBtn">FIRE</div>
+    </div>
+
+    <div id="crosshair"></div>
+    <div id="gameCanvas"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
+
     <script>
-        // 你的金鑰
-        const THE_KEY = 'AIzaSyC4iEfkszutbCm6ufE6nRYPFcPMPV-B6yE';
+        let scene, camera, renderer, controls;
+        let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
+        let prevTime = performance.now();
+        const velocity = new THREE.Vector3();
+        const direction = new THREE.Vector3();
+        const targets = [];
 
-        async function frPowerOn() {
-            const type = document.getElementById('typeSelect').value;
-            const input = document.getElementById('userInput').value;
-            const output = document.getElementById('codeOutput');
-            const status = document.getElementById('statusLabel');
-            const btn = document.getElementById('sendBtn');
+        let currentAmmo = 30;
+        const maxAmmo = 30;
+        const ammoDisplay = document.getElementById('ammoDisplay');
+        const killFeed = document.getElementById('kill-feed');
 
-            if (!input.trim()) return alert("請輸入指令！");
+        // 📱 手機端狀態變數
+        let isMobile = false;
+        let touchLookId = null; 
+        let lastTouchX = 0, lastTouchY = 0;
+        // 搖桿變數
+        let joystickActive = false;
+        let joystickStart = {x: 0, y: 0};
+        let moveVector = {x: 0, y: 0};
 
-            // 狀態設定
-            btn.classList.add('btn-loading');
-            btn.innerText = "生成中...";
-            status.innerText = "CONNECTING FR-CORE...";
-            output.innerText = "/* 正在連線中，請稍候... */";
-
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${THE_KEY}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: `你是一位資深工程師。請直接產出程式碼，類型：${type}，需求：${input}` }] }]
-                    })
-                });
-
-                if (!response.ok) {
-                    const errText = await response.text();
-                    throw new Error(`連線失敗 (代碼: ${response.status})`);
-                }
-
-                const data = await response.json();
-                let code = data.candidates[0].content.parts[0].text;
-                
-                // 去除 Markdown
-                code = code.replace(/```[a-z]*\n/g, '').replace(/```/g, '').trim();
-
-                output.innerText = code;
-                status.innerText = "SUCCESS";
-
-            } catch (err) {
-                output.innerText = `/* FR 系統報告：生成失敗 */\n\n錯誤原因：${err.message}\n\n建議：請檢查手機網路，或嘗試重新整理頁面再試一次。`;
-                status.innerText = "SYSTEM ERROR";
-            } finally {
-                btn.classList.remove('btn-loading');
-                btn.innerText = "發送";
-            }
+        // --- 偵測是否為手機用戶 ---
+        if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+            isMobile = true;
+            document.getElementById('mobile-controls').style.display = 'flex';
+            document.getElementById('start-prompt').innerText = '▶ 觸碰螢幕進入競技場 ◀';
         }
 
-        function copyCode() {
-            navigator.clipboard.writeText(document.getElementById('codeOutput').innerText);
-            alert("已複製！");
+        init();
+        animate();
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x050508);
+            scene.fog = new THREE.FogExp2(0x050508, 0.025);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.y = 2;
+
+            scene.add(new THREE.AmbientLight(0x111122));
+            const light = new THREE.DirectionalLight(0xffffff, 0.5);
+            light.position.set(10, 20, 10);
+            scene.add(light);
+
+            controls = new THREE.PointerLockControls(camera, document.body);
+
+            // 進入遊戲點擊邏輯
+            document.getElementById('instructions').addEventListener('click', () => {
+                document.getElementById('instructions').style.display = 'none';
+                if (!isMobile) {
+                    controls.lock(); // 電腦版才需要鎖定滑鼠
+                }
+            });
+
+            controls.addEventListener('unlock', () => {
+                if(!isMobile) document.getElementById('instructions').style.display = 'flex';
+            });
+
+            scene.add(controls.getObject());
+
+            // --- 💻 電腦版 鍵盤事件 ---
+            if (!isMobile) {
+                const onKeyDown = (e) => {
+                    switch (e.code) {
+                        case 'KeyW': moveForward = true; break;
+                        case 'KeyA': moveLeft = true; break;
+                        case 'KeyS': moveBackward = true; break;
+                        case 'KeyD': moveRight = true; break;
+                    }
+                };
+                const onKeyUp = (e) => {
+                    switch (e.code) {
+                        case 'KeyW': moveForward = false; break;
+                        case 'KeyA': moveLeft = false; break;
+                        case 'KeyS': moveBackward = false; break;
+                        case 'KeyD': moveRight = false; break;
+                    }
+                };
+                document.addEventListener('keydown', onKeyDown);
+                document.addEventListener('keyup', onKeyUp);
+                document.addEventListener('mousedown', (e) => {
+                    if (controls.isLocked && e.button === 0) fireWeapon();
+                });
+            } else {
+                // --- 📱 手機版 觸控事件 (核心升級) ---
+                setupMobileControls();
+            }
+
+            // 建造場地
+            const floorGeo = new THREE.PlaneGeometry(100, 100);
+            const floorMat = new THREE.MeshBasicMaterial({ color: 0x0a0a0f });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = Math.PI / 2;
+            scene.add(floor);
+
+            const grid = new THREE.GridHelper(100, 40, 0xff007f, 0x111122);
+            grid.position.y = 0.01;
+            scene.add(grid);
+
+            // 障礙物方塊
+            const targetNames = ["Pro_Mobile", "Rival_Bot", "Cyber_Ninja", "FR_Player"];
+            for (let i = 0; i < 10; i++) {
+                const h = Math.random() * 4 + 3;
+                const geo = new THREE.BoxGeometry(3, h, 3);
+                const mat = new THREE.MeshStandardMaterial({ color: 0x101015 });
+                const box = new THREE.Mesh(geo, mat);
+                box.position.set(Math.random() * 40 - 20, h / 2, Math.random() * 40 - 20);
+                box.name = targetNames[i % targetNames.length] + ` [${i}]`;
+                scene.add(box);
+                targets.push(box);
+
+                const edges = new THREE.EdgesGeometry(geo);
+                const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x00ffff }));
+                line.position.copy(box.position);
+                scene.add(line);
+            }
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('gameCanvas').appendChild(renderer.domElement);
+        }
+
+        // ================= 📱 手機觸控事件處理 =================
+        function setupMobileControls() {
+            const joystickZone = document.getElementById('joystickZone');
+            const joystickStick = document.getElementById('joystickStick');
+            const fireBtn = document.getElementById('fireBtn');
+
+            // 1. 左側搖桿控制移動
+            joystickZone.addEventListener('touchstart', (e) => {
+                joystickActive = true;
+                const touch = e.touches[0];
+                const rect = joystickZone.getBoundingClientRect();
+                joystickStart = { x: rect.left + rect.width/2, y: rect.top + rect.height/2 };
+            });
+
+            window.addEventListener('touchmove', (e) => {
+                if (!joystickActive) return;
+                
+                // 找出負責控制搖桿的那個 touch
+                let touch = null;
+                for(let t of e.touches) {
+                    if(t.clientX < window.innerWidth / 2) { touch = t; break; }
+                }
+                if(!touch) return;
+
+                let distX = touch.clientX - joystickStart.x;
+                let distY = touch.clientY - joystickStart.y;
+                const maxDist = 40; // 搖桿最大移動半徑
+
+                const distance = Math.sqrt(distX*distX + distY*distY);
+                if (distance > maxDist) {
+                    distX = (distX / distance) * maxDist;
+                    distY = (distY / distance) * maxDist;
+                }
+
+                joystickStick.style.transform = `translate(${distX}px, ${distY}px)`;
+                
+                // 將數值標準化成 -1 到 1 之間，供遊戲移動使用
+                moveVector.x = distX / maxDist;
+                moveVector.y = distY / maxDist;
+            });
+
+            window.addEventListener('touchend', (e) => {
+                // 如果左邊螢幕沒有 touch 了，重置搖桿
+                let hasLeftTouch = false;
+                for(let t of e.touches) {
+                    if(t.clientX < window.innerWidth / 2) hasLeftTouch = true;
+                }
+                if(!hasLeftTouch) {
+                    joystickActive = false;
+                    joystickStick.style.transform = `translate(0px, 0px)`;
+                    moveVector = {x: 0, y: 0};
+                }
+            });
+
+            // 2. 右側螢幕滑動：控制鏡頭轉動
+            window.addEventListener('touchstart', (e) => {
+                for(let t of e.touches) {
+                    // 如果觸碰發生在右半邊螢幕，且不是在點擊開槍按鈕
+                    if(t.clientX > window.innerWidth / 2 && t.target !== fireBtn) {
+                        touchLookId = t.identifier;
+                        lastTouchX = t.clientX;
+                        lastTouchY = t.clientY;
+                    }
+                }
+            });
+
+            window.addEventListener('touchmove', (e) => {
+                for(let t of e.touches) {
+                    if(t.identifier === touchLookId) {
+                        const movementX = t.clientX - lastTouchX;
+                        const movementY = t.clientY - lastTouchY;
+
+                        // 直接手動旋轉 Three.js 相機的角度
+                        camera.rotation.y -= movementX * 0.005;
+                        camera.rotation.x -= movementY * 0.005;
+                        // 限制上下看的高度，防止鏡頭翻轉
+                        camera.rotation.x = Math.max(-Math.PI/2.5, Math.min(Math.PI/2.5, camera.rotation.x));
+
+                        lastTouchX = t.clientX;
+                        lastTouchY = t.clientY;
+                    }
+                }
+            });
+
+            window.addEventListener('touchend', (e) => {
+                let hasLookTouch = false;
+                for(let t of e.touches) {
+                    if(t.identifier === touchLookId) hasLookTouch = true;
+                }
+                if(!hasLookTouch) touchLookId = null;
+            });
+
+            // 3. 右下角開槍按鈕
+            fireBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault(); // 防止觸發滑動相機
+                fireWeapon();
+            });
+        }
+
+        // ================= 開槍邏輯 =================
+        function fireWeapon() {
+            if (currentAmmo <= 0) {
+                currentAmmo = maxAmmo; // 自動秒裝彈
+                ammoDisplay.innerText = `${currentAmmo}/${maxAmmo}`;
+                return;
+            }
+            currentAmmo--;
+            ammoDisplay.innerText = `${currentAmmo}/${maxAmmo}`;
+
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+            const intersects = raycaster.intersectObjects(targets);
+
+            const muzzlePos = new THREE.Vector3(0.2, -0.2, -0.8).applyMatrix4(camera.matrixWorld);
+            let targetPoint = new THREE.Vector3();
+
+            if (intersects.length > 0) {
+                targetPoint.copy(intersects[0].point);
+                addKillNotification(intersects[0].object.name);
+            } else {
+                targetPoint = raycaster.ray.at(80, new THREE.Vector3());
+            }
+
+            // 畫出雷射 Ray
+            const geometry = new THREE.BufferGeometry().setFromPoints([muzzlePos, targetPoint]);
+            const material = new THREE.LineBasicMaterial({ color: 0x00ffff });
+            const line = new THREE.Line(geometry, material);
+            scene.add(line);
+            setTimeout(() => { scene.remove(line); geometry.dispose(); material.dispose(); }, 60);
+        }
+
+        function addKillNotification(name) {
+            const msg = document.createElement('div');
+            msg.className = 'kill-msg';
+            msg.innerHTML = `<span class="killer">You</span><span class="weapon">⚡RAY</span><span class="victim">${name}</span>`;
+            killFeed.appendChild(msg);
+            setTimeout(() => msg.remove(), 2500);
+        }
+
+        // ================= 運動物理更新 =================
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const time = performance.now();
+            const delta = (time - prevTime) / 1000;
+
+            if (!isMobile && controls.isLocked) {
+                // --- 💻 電腦版 WASD 移動邏輯 ---
+                velocity.x -= velocity.x * 10.0 * delta;
+                velocity.z -= velocity.z * 10.0 * delta;
+                direction.z = Number(moveForward) - Number(moveBackward);
+                direction.x = Number(moveRight) - Number(moveLeft);
+                direction.normalize();
+                if (moveForward || moveBackward) velocity.z -= direction.z * 160.0 * delta;
+                if (moveLeft || moveRight) velocity.x -= direction.x * 160.0 * delta;
+                controls.moveRight(-velocity.x * delta);
+                controls.moveForward(-velocity.z * delta);
+            } else if (isMobile && document.getElementById('instructions').style.display === 'none') {
+                // --- 📱 手機版 搖桿移動邏輯 ---
+                // moveVector.y 控制前後，moveVector.x 控制左右
+                const speed = 12;
+                controls.moveRight(moveVector.x * speed * delta);
+                controls.moveForward(-moveVector.y * speed * delta);
+            }
+
+            prevTime = time;
+            renderer.render(scene, camera);
         }
     </script>
 </body>
