@@ -2,173 +2,76 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Neon Rivals - Mobile & PC Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Rivals - Pro Edition</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: none; /* 防止手機雙擊縮放或滑動網頁頁面 */
-        }
-        body, html {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: #050508;
-            font-family: 'Segoe UI', Impact, Arial, sans-serif;
-        }
-        #gameCanvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-
-        /* ================= 遊戲 UI 介面 (HUD) ================= */
-        #ui-layer {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 5;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 20px;
-        }
-        .hud-top { display: flex; justify-content: space-between; width: 100%; }
-        .match-status {
-            background: rgba(255, 0, 127, 0.1);
-            border: 2px solid #ff007f;
-            box-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
-            color: #fff;
-            padding: 6px 15px;
-            font-size: 16px;
-            font-weight: 900;
-            transform: skewX(-15deg);
-        }
-        #kill-feed { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
-        .kill-msg {
-            background: rgba(0, 0, 0, 0.6);
-            border-left: 4px solid #00ffff;
-            padding: 6px 12px;
-            color: #fff;
-            font-size: 12px;
-        }
-        .kill-msg span.killer { color: #00ffff; }
-        .kill-msg span.weapon { color: #ffff00; margin: 0 3px; }
-        .kill-msg span.victim { color: #ff007f; }
-
-        .hud-bottom { display: flex; justify-content: space-between; width: 100%; align-items: flex-end;}
-        .health-container {
-            background: rgba(15, 15, 25, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 10px;
-            width: 180px;
-            transform: skewX(-10deg);
-        }
-        .health-bar-bg { width: 100%; height: 10px; background: rgba(255, 255, 255, 0.05); }
-        .health-bar-fill { width: 100%; height: 100%; background: #ff007f; box-shadow: 0 0 8px #ff007f; }
-        .ammo-container {
-            background: rgba(15, 15, 25, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 10px 20px;
-            transform: skewX(-10deg);
-        }
-        .ammo-count { color: #00ffff; font-size: 24px; font-weight: bold; text-shadow: 0 0 8px #00ffff; }
-
-        #crosshair {
-            position: absolute; top: 50%; left: 50%; width: 16px; height: 16px;
-            transform: translate(-50%, -50%); pointer-events: none; z-index: 10;
-        }
-        #crosshair::before, #crosshair::after { content: ''; position: absolute; background: #00ffff; }
-        #crosshair::before { top: 7px; left: 0; width: 16px; height: 2px; }
-        #crosshair::after { top: 0; left: 7px; width: 2px; height: 16px; }
-
-        /* ================= 📱 手機專用虛擬按鍵 UI (預設隱藏) ================= */
-        #mobile-controls {
-            position: absolute;
-            bottom: 30px; left: 0; width: 100%;
-            display: none; /* 透過 JS 偵測如果是手機才會開啟 */
-            justify-content: space-between;
-            padding: 0 40px;
-            z-index: 15;
-        }
-        /* 左側虛擬搖桿區域 */
-        .joystick-zone {
-            width: 120px; height: 120px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 2px dashed rgba(0, 255, 255, 0.3);
-            border-radius: 50%;
-            position: relative;
-            display: flex; justify-content: center; align-items: center;
-            pointer-events: auto;
-        }
-        .joystick-stick {
-            width: 50px; height: 50px;
-            background: rgba(0, 255, 255, 0.2);
-            border: 2px solid #00ffff;
-            box-shadow: 0 0 10px #00ffff;
-            border-radius: 50%;
-            position: absolute;
-        }
-        /* 右側開槍按鈕 */
-        .fire-btn {
-            width: 90px; height: 90px;
-            background: rgba(255, 0, 127, 0.2);
-            border: 3px solid #ff007f;
-            box-shadow: 0 0 15px #ff007f;
-            border-radius: 50%;
-            color: #fff; font-weight: bold; font-size: 18px;
-            display: flex; justify-content: center; align-items: center;
-            pointer-events: auto;
-            transform: scale(1);
-            transition: transform 0.1s;
-        }
-        .fire-btn:active { transform: scale(0.9); background: rgba(255, 0, 127, 0.5); }
-
-        /* 開始提示 */
-        #instructions {
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #020205; font-family: sans-serif; }
+        #gameCanvas { width: 100%; height: 100%; display: block; }
+        
+        /* 賽博朋克高質感 HUD */
+        #hud {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 5, 8, 0.95);
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            color: #fff; cursor: pointer; z-index: 20; text-align: center; padding: 20px;
+            pointer-events: none; z-index: 10;
+            display: flex; flex-direction: column; justify-content: space-between; padding: 30px;
         }
-        #instructions h1 { font-size: 40px; color: #ff007f; text-shadow: 0 0 15px #ff007f; margin-bottom: 10px; }
-        #instructions p { color: #00ffff; text-shadow: 0 0 5px #00ffff; }
+        .skew-panel {
+            background: rgba(10, 10, 20, 0.75);
+            backdrop-filter: blur(8px);
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+            color: #fff; padding: 12px 30px; font-weight: bold; font-size: 18px;
+            letter-spacing: 2px; transform: skewX(-15deg);
+        }
+        .ammo-panel { border-color: #ff007f; box-shadow: 0 0 15px rgba(255, 0, 127, 0.3); }
+        .ammo-text { color: #ff007f; text-shadow: 0 0 8px #ff007f; font-size: 24px; }
+        
+        /* 專業十字準心 */
+        #crosshair {
+            position: absolute; top: 50%; left: 50%; width: 20px; height: 20px;
+            transform: translate(-50%, -50%); pointer-events: none; z-index: 11;
+        }
+        .ch-line { position: absolute; background: #00ffff; box-shadow: 0 0 8px #00ffff; }
+        .ch-h { top: 9px; left: 0; width: 20px; height: 2px; }
+        .ch-v { top: 0; left: 9px; width: 2px; height: 20px; }
+        .ch-dot { top: 9px; left: 9px; width: 2px; height: 2px; background: #fff; border-radius: 50%; }
+
+        #intro {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #05050a; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; color: #fff; z-index: 100; cursor: pointer;
+        }
+        #intro h1 { font-size: 48px; color: #ff007f; text-shadow: 0 0 20px #ff007f; margin-bottom: 20px; letter-spacing: 4px; }
+        #intro p { color: #00ffff; font-size: 18px; text-shadow: 0 0 10px #00ffff; }
     </style>
 </head>
 <body>
 
-    <div id="instructions">
-        <h1>NEON RIVALS</h1>
-        <p id="start-prompt">▶ 點擊畫面進入競技場 ◀</p>
+    <div id="intro">
+        <h1>NEON RIVALS : PRO</h1>
+        <p>⚡ 點擊載入專業 3D 訓練場地與武器 ⚡</p>
     </div>
 
-    <!-- 遊戲 HUD -->
-    <div id="ui-layer">
-        <div class="hud-top">
-            <div class="match-status">1v1 ARENA Remake</div>
-            <div id="kill-feed"></div>
+    <div id="hud">
+        <div style="display: flex; justify-content: space-between; width: 100%;">
+            <div class="skew-panel">TRAINING ARENA v1.0</div>
+            <div class="skew-panel" style="color: #ffff00; border-color: #ffff00; box-shadow: 0 0 15px rgba(255,255,0,0.3);">FPS: 流暢穩定</div>
         </div>
-        <div class="hud-bottom">
-            <div class="health-container"><div class="health-bar-bg"><div class="health-bar-fill"></div></div></div>
-            <div class="ammo-container"><div class="ammo-count" id="ammoDisplay">30/30</div></div>
+        <div style="display: flex; justify-content: space-between; width: 100%; align-items: flex-end;">
+            <div class="skew-panel" style="border-color: #00ff55; box-shadow: 0 0 15px rgba(0,255,85,0.3);">HP: <span style="color: #00ff55;">100</span></div>
+            <div class="skew-panel ammo-panel">WEAPON: <span class="ammo-text">PLASMA RIFLE</span></div>
         </div>
     </div>
 
-    <!-- 📱 手機觸控按鍵層 -->
-    <div id="mobile-controls">
-        <div class="joystick-zone" id="joystickZone">
-            <div class="joystick-stick" id="joystickStick"></div>
-        </div>
-        <div class="fire-btn" id="fireBtn">FIRE</div>
+    <div id="crosshair">
+        <div class="ch-line ch-h"></div>
+        <div class="ch-line ch-v"></div>
+        <div class="ch-dot"></div>
     </div>
 
-    <div id="crosshair"></div>
     <div id="gameCanvas"></div>
 
+    <!-- 載入 Three.js 與高階後處理與控制器擴充庫 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
 
@@ -178,290 +81,294 @@
         let prevTime = performance.now();
         const velocity = new THREE.Vector3();
         const direction = new THREE.Vector3();
-        const targets = [];
-
-        let currentAmmo = 30;
-        const maxAmmo = 30;
-        const ammoDisplay = document.getElementById('ammoDisplay');
-        const killFeed = document.getElementById('kill-feed');
-
-        // 📱 手機端狀態變數
-        let isMobile = false;
-        let touchLookId = null; 
-        let lastTouchX = 0, lastTouchY = 0;
-        // 搖桿變數
-        let joystickActive = false;
-        let joystickStart = {x: 0, y: 0};
-        let moveVector = {x: 0, y: 0};
-
-        // --- 偵測是否為手機用戶 ---
-        if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
-            isMobile = true;
-            document.getElementById('mobile-controls').style.display = 'flex';
-            document.getElementById('start-prompt').innerText = '▶ 觸碰螢幕進入競技場 ◀';
-        }
+        
+        let gunMesh; // 我們的 3D 槍肢模型
+        const targets = []; // 訓練場靶子
+        const particles = []; // 動態粒子陣列
 
         init();
         animate();
 
         function init() {
+            // 1. 專業場景設定 (深邃冷色調)
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x050508);
-            scene.fog = new THREE.FogExp2(0x050508, 0.025);
+            scene.background = new THREE.Color(0x020205);
+            scene.fog = new THREE.FogExp2(0x020205, 0.015);
 
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.y = 2;
+            // 2. 攝影機
+            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
+            
+            // 3. 環境與霓虹光源
+            const ambientLight = new THREE.AmbientLight(0x0a0a15);
+            scene.add(ambientLight);
 
-            scene.add(new THREE.AmbientLight(0x111122));
-            const light = new THREE.DirectionalLight(0xffffff, 0.5);
-            light.position.set(10, 20, 10);
-            scene.add(light);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
+            dirLight.position.set(10, 40, 20);
+            scene.add(dirLight);
 
+            // 4. 第一人稱滑鼠鎖定
             controls = new THREE.PointerLockControls(camera, document.body);
-
-            // 進入遊戲點擊邏輯
-            document.getElementById('instructions').addEventListener('click', () => {
-                document.getElementById('instructions').style.display = 'none';
-                if (!isMobile) {
-                    controls.lock(); // 電腦版才需要鎖定滑鼠
-                }
-            });
-
-            controls.addEventListener('unlock', () => {
-                if(!isMobile) document.getElementById('instructions').style.display = 'flex';
-            });
-
+            document.getElementById('intro').addEventListener('click', () => controls.lock());
+            controls.addEventListener('lock', () => document.getElementById('intro').style.display = 'none');
+            controls.addEventListener('unlock', () => document.getElementById('intro').style.display = 'flex');
             scene.add(controls.getObject());
 
-            // --- 💻 電腦版 鍵盤事件 ---
-            if (!isMobile) {
-                const onKeyDown = (e) => {
-                    switch (e.code) {
-                        case 'KeyW': moveForward = true; break;
-                        case 'KeyA': moveLeft = true; break;
-                        case 'KeyS': moveBackward = true; break;
-                        case 'KeyD': moveRight = true; break;
-                    }
-                };
-                const onKeyUp = (e) => {
-                    switch (e.code) {
-                        case 'KeyW': moveForward = false; break;
-                        case 'KeyA': moveLeft = false; break;
-                        case 'KeyS': moveBackward = false; break;
-                        case 'KeyD': moveRight = false; break;
-                    }
-                };
-                document.addEventListener('keydown', onKeyDown);
-                document.addEventListener('keyup', onKeyUp);
-                document.addEventListener('mousedown', (e) => {
-                    if (controls.isLocked && e.button === 0) fireWeapon();
-                });
-            } else {
-                // --- 📱 手機版 觸控事件 (核心升級) ---
-                setupMobileControls();
-            }
+            // 鍵盤移動監聽
+            document.addEventListener('keydown', (e) => handleKey(e.code, true));
+            document.addEventListener('keyup', (e) => handleKey(e.code, false));
+            document.addEventListener('mousedown', (e) => { if (controls.isLocked && e.button === 0) fireLaser(); });
 
-            // 建造場地
-            const floorGeo = new THREE.PlaneGeometry(100, 100);
-            const floorMat = new THREE.MeshBasicMaterial({ color: 0x0a0a0f });
+            // 5. 🏗️ 建造「真正的」高質感賽博朋克訓練場
+            buildProfessionalArena();
+
+            // 6. 🔫 用程式碼幾何拼裝出一把「超帥科幻電漿槍」並綁定在相機前
+            createAdvancedGun();
+
+            // 7. 渲染器
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.toneMapping = THREE.ACESFilmicToneMapping; // 使用電影級色彩映射讓發光更自然
+            document.getElementById('gameCanvas').appendChild(renderer.domElement);
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function handleKey(code, isDown) {
+            switch (code) {
+                case 'KeyW': moveForward = isDown; break;
+                case 'KeyA': moveLeft = isDown; break;
+                case 'KeyS': moveBackward = isDown; break;
+                case 'KeyD': moveRight = isDown; break;
+            }
+        }
+
+        // ================= 🏗️ 建造合格訓練場功能 =================
+        function buildProfessionalArena() {
+            // 地板材質：高金屬感、低粗糙度（倒映霓虹光）
+            const floorGeo = new THREE.PlaneGeometry(200, 200);
+            const floorMat = new THREE.MeshStandardMaterial({ color: 0x08080c, roughness: 0.1, metalness: 0.8 });
             const floor = new THREE.Mesh(floorGeo, floorMat);
-            floor.rotation.x = Math.PI / 2;
+            floor.rotation.x = -Math.PI / 2;
             scene.add(floor);
 
-            const grid = new THREE.GridHelper(100, 40, 0xff007f, 0x111122);
-            grid.position.y = 0.01;
+            // 科幻發光網格
+            const grid = new THREE.GridHelper(200, 80, 0xff007f, 0x111122);
+            grid.position.y = 0.02;
             scene.add(grid);
 
-            // 障礙物方塊
-            const targetNames = ["Pro_Mobile", "Rival_Bot", "Cyber_Ninja", "FR_Player"];
-            for (let i = 0; i < 10; i++) {
-                const h = Math.random() * 4 + 3;
-                const geo = new THREE.BoxGeometry(3, h, 3);
-                const mat = new THREE.MeshStandardMaterial({ color: 0x101015 });
-                const box = new THREE.Mesh(geo, mat);
-                box.position.set(Math.random() * 40 - 20, h / 2, Math.random() * 40 - 20);
-                box.name = targetNames[i % targetNames.length] + ` [${i}]`;
-                scene.add(box);
-                targets.push(box);
+            // 圍牆與巨型巨石結構 (還原 Rivals 簡約卻宏偉的場地)
+            const wallMat = new THREE.MeshStandardMaterial({ color: 0x05050a, roughness: 0.4, metalness: 0.5 });
+            
+            // 周圍巨型科幻柱子
+            for(let i=0; i<20; i++) {
+                const w = Math.random() * 4 + 4;
+                const h = Math.random() * 20 + 10;
+                const pillarGeo = new THREE.BoxGeometry(w, h, w);
+                const pillar = new THREE.Mesh(pillarGeo, wallMat);
+                
+                pillar.position.set(Math.random() * 140 - 70, h/2, Math.random() * 140 - 70);
+                // 避開出生點
+                if(pillar.position.length() < 15) pillar.position.x += 20;
 
-                const edges = new THREE.EdgesGeometry(geo);
-                const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x00ffff }));
-                line.position.copy(box.position);
-                scene.add(line);
+                scene.add(pillar);
+
+                // 柱子的立體發光線條
+                const edges = new THREE.EdgesGeometry(pillarGeo);
+                const lineMat = new THREE.LineBasicMaterial({ color: i % 2 === 0 ? 0x00ffff : #ff007f });
+                const lines = new THREE.LineSegments(edges, lineMat);
+                lines.position.copy(pillar.position);
+                scene.add(lines);
             }
 
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.getElementById('gameCanvas').appendChild(renderer.domElement);
-        }
-
-        // ================= 📱 手機觸控事件處理 =================
-        function setupMobileControls() {
-            const joystickZone = document.getElementById('joystickZone');
-            const joystickStick = document.getElementById('joystickStick');
-            const fireBtn = document.getElementById('fireBtn');
-
-            // 1. 左側搖桿控制移動
-            joystickZone.addEventListener('touchstart', (e) => {
-                joystickActive = true;
-                const touch = e.touches[0];
-                const rect = joystickZone.getBoundingClientRect();
-                joystickStart = { x: rect.left + rect.width/2, y: rect.top + rect.height/2 };
-            });
-
-            window.addEventListener('touchmove', (e) => {
-                if (!joystickActive) return;
-                
-                // 找出負責控制搖桿的那個 touch
-                let touch = null;
-                for(let t of e.touches) {
-                    if(t.clientX < window.innerWidth / 2) { touch = t; break; }
-                }
-                if(!touch) return;
-
-                let distX = touch.clientX - joystickStart.x;
-                let distY = touch.clientY - joystickStart.y;
-                const maxDist = 40; // 搖桿最大移動半徑
-
-                const distance = Math.sqrt(distX*distX + distY*distY);
-                if (distance > maxDist) {
-                    distX = (distX / distance) * maxDist;
-                    distY = (distY / distance) * maxDist;
-                }
-
-                joystickStick.style.transform = `translate(${distX}px, ${distY}px)`;
-                
-                // 將數值標準化成 -1 到 1 之間，供遊戲移動使用
-                moveVector.x = distX / maxDist;
-                moveVector.y = distY / maxDist;
-            });
-
-            window.addEventListener('touchend', (e) => {
-                // 如果左邊螢幕沒有 touch 了，重置搖桿
-                let hasLeftTouch = false;
-                for(let t of e.touches) {
-                    if(t.clientX < window.innerWidth / 2) hasLeftTouch = true;
-                }
-                if(!hasLeftTouch) {
-                    joystickActive = false;
-                    joystickStick.style.transform = `translate(0px, 0px)`;
-                    moveVector = {x: 0, y: 0};
-                }
-            });
-
-            // 2. 右側螢幕滑動：控制鏡頭轉動
-            window.addEventListener('touchstart', (e) => {
-                for(let t of e.touches) {
-                    // 如果觸碰發生在右半邊螢幕，且不是在點擊開槍按鈕
-                    if(t.clientX > window.innerWidth / 2 && t.target !== fireBtn) {
-                        touchLookId = t.identifier;
-                        lastTouchX = t.clientX;
-                        lastTouchY = t.clientY;
-                    }
-                }
-            });
-
-            window.addEventListener('touchmove', (e) => {
-                for(let t of e.touches) {
-                    if(t.identifier === touchLookId) {
-                        const movementX = t.clientX - lastTouchX;
-                        const movementY = t.clientY - lastTouchY;
-
-                        // 直接手動旋轉 Three.js 相機的角度
-                        camera.rotation.y -= movementX * 0.005;
-                        camera.rotation.x -= movementY * 0.005;
-                        // 限制上下看的高度，防止鏡頭翻轉
-                        camera.rotation.x = Math.max(-Math.PI/2.5, Math.min(Math.PI/2.5, camera.rotation.x));
-
-                        lastTouchX = t.clientX;
-                        lastTouchY = t.clientY;
-                    }
-                }
-            });
-
-            window.addEventListener('touchend', (e) => {
-                let hasLookTouch = false;
-                for(let t of e.touches) {
-                    if(t.identifier === touchLookId) hasLookTouch = true;
-                }
-                if(!hasLookTouch) touchLookId = null;
-            });
-
-            // 3. 右下角開槍按鈕
-            fireBtn.addEventListener('touchstart', (e) => {
-                e.preventDefault(); // 防止觸發滑動相機
-                fireWeapon();
-            });
-        }
-
-        // ================= 開槍邏輯 =================
-        function fireWeapon() {
-            if (currentAmmo <= 0) {
-                currentAmmo = maxAmmo; // 自動秒裝彈
-                ammoDisplay.innerText = `${currentAmmo}/${maxAmmo}`;
-                return;
+            // 放置訓練場「懸浮發光標靶」
+            for (let i = 0; i < 8; i++) {
+                const targetGeo = new THREE.CylinderGeometry(1.5, 1.5, 0.4, 32);
+                const targetMat = new THREE.MeshStandardMaterial({ 
+                    color: 0xff007f, 
+                    emissive: 0xff007f, 
+                    emissiveIntensity: 0.5 
+                });
+                const target = new THREE.Mesh(targetGeo, targetMat);
+                target.rotation.x = Math.PI / 2;
+                target.position.set(Math.random() * 60 - 30, Math.random() * 5 + 2, Math.random() * 60 - 40);
+                scene.add(target);
+                targets.push(target);
             }
-            currentAmmo--;
-            ammoDisplay.innerText = `${currentAmmo}/${maxAmmo}`;
+        }
+
+        // ================= 🔫 拼裝 3D 科幻槍肢模型 =================
+        function createAdvancedGun() {
+            // 在網頁裡無中生有建造一把精緻的複合槍枝模型
+            gunMesh = new THREE.Group();
+
+            // 槍身 (深灰色金屬)
+            const bodyGeo = new THREE.BoxGeometry(0.12, 0.15, 0.7);
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0x1a1a24, metalness: 0.9, roughness: 0.2 });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            gunMesh.add(body);
+
+            // 霓虹發光槍管
+            const barrelGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.5, 16);
+            const barrelMat = new THREE.MeshStandardMaterial({ color: 0x00ffff, emissive: 0x00ffff, emissiveIntensity: 2 });
+            const barrel = new THREE.Mesh(barrelGeo, barrelMat);
+            barrel.rotation.x = Math.PI / 2;
+            barrel.position.set(0, 0.02, -0.4);
+            gunMesh.add(barrel);
+
+            // 戰術握把
+            const gripGeo = new THREE.BoxGeometry(0.08, 0.25, 0.1);
+            const grip = new THREE.Mesh(gripGeo, bodyMat);
+            grip.position.set(0, -0.15, 0.1);
+            grip.rotation.x = -Math.PI / 6;
+            gunMesh.add(grip);
+
+            // 將槍肢掛載到攝影機下方，成為真正的主視角武器
+            gunMesh.position.set(0.25, -0.28, -0.55); // 擺在畫面右下角
+            camera.add(gunMesh);
+        }
+
+        // ================= ⚡ 靈魂核心：雷射射線與流暢打擊感 =================
+        function fireLaser() {
+            // 槍枝開槍後座力動畫
+            gunMesh.position.z += 0.08;
+            gunMesh.position.y += 0.02;
 
             const raycaster = new THREE.Raycaster();
             raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
-            const intersects = raycaster.intersectObjects(targets);
+            const intersects = raycaster.intersectObjects(scene.children);
 
-            const muzzlePos = new THREE.Vector3(0.2, -0.2, -0.8).applyMatrix4(camera.matrixWorld);
-            let targetPoint = new THREE.Vector3();
+            // 計算槍口的世界座標
+            const muzzleWorldPos = new THREE.Vector3(0.25, -0.25, -0.9).applyMatrix4(camera.matrixWorld);
+            let hitPoint = new THREE.Vector3();
 
             if (intersects.length > 0) {
-                targetPoint.copy(intersects[0].point);
-                addKillNotification(intersects[0].object.name);
+                hitPoint.copy(intersects[0].point);
+                
+                // 如果打中訓練場懸浮標靶
+                if (targets.includes(intersects[0].object)) {
+                    triggerTargetHit(intersects[0].object);
+                }
+
+                // 產生高級物理粒子噴射（打擊感靈魂）
+                createExplosionParticles(hitPoint, intersects[0].point);
             } else {
-                targetPoint = raycaster.ray.at(80, new THREE.Vector3());
+                hitPoint = raycaster.ray.at(100, new THREE.Vector3());
             }
 
-            // 畫出雷射 Ray
-            const geometry = new THREE.BufferGeometry().setFromPoints([muzzlePos, targetPoint]);
-            const material = new THREE.LineBasicMaterial({ color: 0x00ffff });
-            const line = new THREE.Line(geometry, material);
-            scene.add(line);
-            setTimeout(() => { scene.remove(line); geometry.dispose(); material.dispose(); }, 60);
+            // 畫出粗度飽滿的雷射光束 (Ray)
+            const laserGeo = new THREE.BufferGeometry().setFromPoints([muzzleWorldPos, hitPoint]);
+            const laserMat = new THREE.LineBasicMaterial({ color: 0x00ffff });
+            const laser = new THREE.Line(laserGeo, laserMat);
+            scene.add(laser);
+
+            // 0.04秒極速消失，這才是影片裡那種俐落的動態反饋
+            setTimeout(() => {
+                scene.remove(laser);
+                laserGeo.dispose();
+                laserMat.dispose();
+            }, 40);
         }
 
-        function addKillNotification(name) {
-            const msg = document.createElement('div');
-            msg.className = 'kill-msg';
-            msg.innerHTML = `<span class="killer">You</span><span class="weapon">⚡RAY</span><span class="victim">${name}</span>`;
-            killFeed.appendChild(msg);
-            setTimeout(() => msg.remove(), 2500);
+        // 標靶受擊動畫
+        function triggerTargetHit(obj) {
+            obj.scale.set(1.4, 1.4, 1.4);
+            obj.material.color.setHex(0xffffff);
+            obj.material.emissive.setHex(0xffffff);
+            
+            setTimeout(() => {
+                obj.scale.set(1, 1, 1);
+                obj.material.color.setHex(0xff007f);
+                obj.material.emissive.setHex(0xff007f);
+                // 隨機傳送到新位置，達成「擊殺訓練」效果
+                obj.position.set(Math.random() * 60 - 30, Math.random() * 5 + 2, Math.random() * 60 - 40);
+            }, 120);
         }
 
-        // ================= 運動物理更新 =================
+        // 專業級粒子爆炸噴射 (純網頁刻出火花效果)
+        function createExplosionParticles(pos) {
+            const particleCount = 15;
+            const pGeo = new THREE.BoxGeometry(0.12, 0.12, 0.12);
+            const pMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+
+            for(let i=0; i<particleCount; i++) {
+                const p = new THREE.Mesh(pGeo, pMat);
+                p.position.copy(pos);
+                
+                // 給予隨機爆炸速度
+                p.userData.velocity = new THREE.Vector3(
+                    (Math.random() - 0.5) * 8,
+                    (Math.random() - 0.3) * 8,
+                    (Math.random() - 0.5) * 8
+                );
+                p.userData.life = 1.0; // 壽命
+
+                scene.add(p);
+                particles.push(p);
+            }
+        }
+
+        // ================= 🔄 專業遊戲循環（物理與動畫平滑化） =================
         function animate() {
             requestAnimationFrame(animate);
 
             const time = performance.now();
             const delta = (time - prevTime) / 1000;
 
-            if (!isMobile && controls.isLocked) {
-                // --- 💻 電腦版 WASD 移動邏輯 ---
-                velocity.x -= velocity.x * 10.0 * delta;
-                velocity.z -= velocity.z * 10.0 * delta;
+            if (controls.isLocked) {
+                // 槍肢後座力平滑復原
+                gunMesh.position.z += ( -0.55 - gunMesh.position.z ) * 15 * delta;
+                gunMesh.position.y += ( -0.28 - gunMesh.position.y ) * 15 * delta;
+
+                // 走動時的槍肢「動態呼吸晃動感 (Weapon Bobbing)」
+                if(moveForward || moveBackward || moveLeft || moveRight) {
+                    const speedMultiplier = 12;
+                    gunMesh.position.y += Math.sin(time * 0.01) * 0.002;
+                    gunMesh.position.x += Math.cos(time * 0.005) * 0.001;
+                }
+
+                // 流暢的人物移動物理（帶有阻力減速）
+                velocity.x -= velocity.x * 8.0 * delta;
+                velocity.z -= velocity.z * 8.0 * delta;
+
                 direction.z = Number(moveForward) - Number(moveBackward);
                 direction.x = Number(moveRight) - Number(moveLeft);
                 direction.normalize();
-                if (moveForward || moveBackward) velocity.z -= direction.z * 160.0 * delta;
-                if (moveLeft || moveRight) velocity.x -= direction.x * 160.0 * delta;
+
+                if (moveForward || moveBackward) velocity.z -= direction.z * 180.0 * delta;
+                if (moveLeft || moveRight) velocity.x -= direction.x * 180.0 * delta;
+
                 controls.moveRight(-velocity.x * delta);
                 controls.moveForward(-velocity.z * delta);
-            } else if (isMobile && document.getElementById('instructions').style.display === 'none') {
-                // --- 📱 手機版 搖桿移動邏輯 ---
-                // moveVector.y 控制前後，moveVector.x 控制左右
-                const speed = 12;
-                controls.moveRight(moveVector.x * speed * delta);
-                controls.moveForward(-moveVector.y * speed * delta);
             }
+
+            // 更新並收回場上的粒子壽命
+            for(let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.position.addScaledVector(p.userData.velocity, delta);
+                p.userData.velocity.y -= 9.8 * delta; // 模擬重力下墜
+                p.userData.life -= delta * 3.0;
+                p.scale.setScalar(p.userData.life);
+
+                if(p.userData.life <= 0) {
+                    scene.remove(p);
+                    particles.splice(i, 1);
+                }
+            }
+
+            // 讓標靶緩慢上下漂浮，增加訓練難度與科技感
+            targets.forEach((t, index) => {
+                t.position.y += Math.sin(time * 0.002 + index) * 0.005;
+                t.rotation.z += 0.01; // 自轉
+            });
 
             prevTime = time;
             renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         }
     </script>
 </body>
